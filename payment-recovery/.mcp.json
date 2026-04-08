@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "twilio": {
+      "command": "npx",
+      "args": ["-y", "@twilio-alpha/mcp"],
+      "env": {
+        "TWILIO_ACCOUNT_SID": "${TWILIO_ACCOUNT_SID}",
+        "TWILIO_AUTH_TOKEN": "${TWILIO_AUTH_TOKEN}"
+      }
+    },
+    "slack": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-slack"],
+      "env": {
+        "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}"
+      }
+    }
+  }
+}

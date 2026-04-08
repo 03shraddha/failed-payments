@@ -1,0 +1,11 @@
+{
+  "enabledMcpjsonServers": ["twilio", "slack"],
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "Bash(uvicorn:*)",
+      "Bash(pip:*)",
+      "Bash(curl:*)"
+    ]
+  }
+}

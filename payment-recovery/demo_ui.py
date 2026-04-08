@@ -18,8 +18,6 @@ from actions.message_generator import generate_recovery_messages
 from actions.slack import post_slack
 from actions.sms import send_sms
 from config import GMAIL_FROM_ADDRESS
-from razorpay_client import create_payment_link
-
 router = APIRouter()
 
 # ---------------------------------------------------------------------------
@@ -36,6 +34,7 @@ SCENARIOS: dict = {
         "order_id": "order_demo_upi_001",
         "payment_id": "pay_demo_upi_001",
         "error": "Payment was not completed due to a UPI timeout. The transaction was not processed.",
+        "demo_link": "https://rzp.io/l/Kj7mPqR2",
     },
     "card_decline": {
         "label": "Card Declined",
@@ -47,6 +46,7 @@ SCENARIOS: dict = {
         "order_id": "order_demo_card_001",
         "payment_id": "pay_demo_card_001",
         "error": "Your payment was declined by the bank. Please try a different payment method or contact your bank.",
+        "demo_link": "https://rzp.io/l/Hn4xWsT8",
     },
     "netbanking_failure": {
         "label": "Net Banking",
@@ -58,6 +58,7 @@ SCENARIOS: dict = {
         "order_id": "order_demo_nb_001",
         "payment_id": "pay_demo_nb_001",
         "error": "Net banking session expired. Please retry with a fresh session.",
+        "demo_link": "https://rzp.io/l/Bv9cLmY5",
     },
 }
 
@@ -83,14 +84,8 @@ async def simulate(req: SimulateRequest):
     reason = s["error"]
     method = s["method"]
 
-    # 1. Generate a fresh payment link via Razorpay
-    link = await create_payment_link(
-        order_id=s["order_id"],
-        amount_paise=s["amount"],
-        contact=phone,
-        email=email,
-        description=f"Retry payment for order {s['order_id']}",
-    )
+    # 1. Use the demo link directly — avoids hitting Razorpay with fake order IDs
+    link = s["demo_link"]
 
     # 2. Ask OpenAI to craft personalised jewellery-shop recovery messages
     msgs = await generate_recovery_messages(

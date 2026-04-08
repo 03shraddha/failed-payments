@@ -1,6 +1,8 @@
 import asyncio
 import logging
+import time
 
+from twilio.base.exceptions import TwilioRestException
 from twilio.rest import Client
 
 from config import (
@@ -14,6 +16,11 @@ logger = logging.getLogger(__name__)
 
 # Module-level singleton — avoids re-creating the client on every webhook
 _client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+
+# Twilio terminal statuses — anything in FAILED means delivery won't happen
+_DELIVERED = {"delivered"}
+_FAILED    = {"failed", "undelivered"}
+_TERMINAL  = _DELIVERED | _FAILED | {"canceled"}
 
 
 def _normalize_phone(phone: str) -> str:
@@ -54,17 +61,57 @@ def _build_message(amount: float, reason: str, link: str) -> str:
     return template.format(amount=amount, reason=truncated, link=link, biz=BUSINESS_NAME)
 
 
+def _poll_status(sid: str, max_wait: int = 8) -> str:
+    """
+    Polls Twilio for the message status until it reaches a terminal state
+    or max_wait seconds elapse. Returns the final status string.
+
+    Twilio statuses: queued → sending → sent → delivered
+                                              → undelivered / failed
+    """
+    deadline = time.time() + max_wait
+    while time.time() < deadline:
+        msg = _client.messages(sid).fetch()
+        status = msg.status
+        logger.info("Twilio message %s status: %s", sid, status)
+        if status in _TERMINAL:
+            return status
+        time.sleep(1)
+    return "unknown"  # timed out waiting — not necessarily failed
+
+
 def _send_sms_sync(phone: str, amount: float, reason: str, link: str, custom_text: str | None = None) -> None:
     """Synchronous Twilio call — run via asyncio.to_thread to avoid blocking the event loop."""
     normalized = _normalize_phone(phone)
     body = custom_text if custom_text else _build_message(amount, reason, link)
 
-    message = _client.messages.create(
-        body=body,
-        from_=TWILIO_FROM_NUMBER,
-        to=normalized,
-    )
-    logger.info("SMS sent: SID=%s to=%s chars=%d", message.sid, normalized, len(body))
+    try:
+        message = _client.messages.create(
+            body=body,
+            from_=TWILIO_FROM_NUMBER,
+            to=normalized,
+        )
+    except TwilioRestException as exc:
+        # Error code 21608 = unverified number on trial account
+        if exc.code == 21608:
+            raise RuntimeError(
+                f"SMS to {normalized} failed: number not verified on Twilio trial account. "
+                "Verify it at console.twilio.com/phone-numbers/verified"
+            ) from exc
+        raise RuntimeError(f"Twilio API error {exc.code}: {exc.msg}") from exc
+
+    logger.info("SMS accepted: SID=%s to=%s chars=%d", message.sid, normalized, len(body))
+
+    # Poll for actual delivery — surfaces silent failures (DND, carrier blocks)
+    final_status = _poll_status(message.sid)
+
+    if final_status in _FAILED:
+        raise RuntimeError(
+            f"SMS to {normalized} was not delivered (status={final_status}). "
+            "Possible causes: Indian DND registry, carrier block, or trial account restriction."
+        )
+
+    logger.info("SMS delivery status for %s: %s", message.sid, final_status)
 
 
 async def send_sms(

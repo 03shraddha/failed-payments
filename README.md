@@ -2,16 +2,23 @@
 
 Automatically recovers failed Razorpay payments by sending SMS, email, and Slack alerts with a fresh payment link — all triggered via webhook.
 
+---
+
 ## What It Does
 
 When a payment fails on Razorpay:
-1. Razorpay sends a webhook to this server
-2. The server verifies the webhook signature (HMAC-SHA256)
-3. Generates a fresh Razorpay payment link (valid 24 hours)
-4. Simultaneously sends:
-   - **SMS** (via Twilio) to the customer's phone
-   - **Email** (via Gmail SMTP) to the customer's email
-   - **Slack alert** to your `#payment-ops` channel
+
+| Step | What happens |
+|------|-------------|
+| 1 | Razorpay sends a webhook to this server |
+| 2 | Server verifies the webhook signature (HMAC-SHA256) |
+| 3 | Generates a fresh Razorpay payment link (valid 24 hours) |
+| 4 | Simultaneously sends SMS, Email, and a Slack alert |
+
+**Notifications sent in parallel:**
+- **SMS** (via Twilio) to the customer's phone
+- **Email** (via Gmail SMTP) to the customer's email
+- **Slack alert** to your `#payment-ops` channel
 
 A browser-based **demo UI** is available at `/demo` to simulate all three scenarios without touching real Razorpay data.
 
@@ -162,13 +169,15 @@ payment-recovery/
 
 ## Tech Stack
 
-- **FastAPI** — web framework
-- **Razorpay** — payment gateway & webhooks
-- **Twilio** — SMS notifications
-- **Gmail SMTP** — email notifications
-- **Slack SDK** — Slack alerts
-- **OpenAI GPT-4o-mini** — AI-personalised recovery messages (optional)
-- **Anthropic Claude + MCP** — alternative MCP-based Slack dispatch (optional)
+| Layer | Technology | Role |
+|-------|-----------|------|
+| Web framework | **FastAPI** | Handles webhook + demo endpoints |
+| Payment gateway | **Razorpay** | Webhooks + payment link generation |
+| SMS | **Twilio** | Customer SMS notifications |
+| Email | **Gmail SMTP** | Customer email notifications |
+| Alerting | **Slack SDK** | Internal `#payment-ops` alerts |
+| AI messages | **OpenAI GPT-4o-mini** | Personalised recovery messages (optional) |
+| Alt Slack path | **Anthropic Claude + MCP** | MCP-based Slack dispatch (optional) |
 
 ---
 
@@ -182,15 +191,27 @@ The entry point is a single POST endpoint (`/webhook/payment-failed`). It verifi
 
 ## Narrative
 
+### Parallel dispatch within webhook SLA
+
 The starting constraint was delivery reliability within a tight SLA. Razorpay expects webhook responses within 10 seconds; any downstream API call — Twilio, Gmail, Slack — that blocks sequentially would exhaust that budget under normal network conditions. The solution was `asyncio.gather` with `return_exceptions=True`, which dispatches all three notification channels in parallel and isolates individual failures. A Slack alert still fires even if the SMS fails; an email still sends even if Slack is down.
+
+### Signature verification on raw bytes
 
 The second decision was where to verify identity. Reading the raw request bytes before any JSON parsing was deliberate — HMAC-SHA256 signatures are computed over the exact wire bytes Razorpay sent. Re-serialising parsed JSON and verifying that would silently break on any whitespace or key-ordering difference. The raw bytes are buffered first, verified, then parsed.
 
+### Payment link as a recoverable dependency
+
 Payment link generation was treated as a recoverable dependency rather than a hard requirement. If the Razorpay API call to create a new link fails (timeout, invalid order, API error), the system falls back to a well-formed `rzp.io` short URL constructed from the order ID. Downstream actions always receive a valid link — they never need to handle a null.
+
+### AI messaging isolated to demo
 
 The third layer added was AI-personalised messaging via OpenAI. Rather than coupling it to the main webhook path, it was isolated to the demo UI, where latency is acceptable and the fallback to static templates is transparent. The production webhook path uses direct templates that are deterministic and fast.
 
+### MCP-based Slack as a drop-in alternative
+
 A parallel implementation of the Slack action (`slack_mcp.py`) was built to explore the MCP pattern — spawning the official Slack MCP server as a subprocess, listing its tools, and letting Claude decide to call `slack_post_message` via tool use rather than hardcoded SDK calls. Both implementations share the same function signature, making them drop-in replaceable.
+
+### SMS delivery and carrier-level DND (India)
 
 SMS delivery surfaced a late-stage constraint specific to the Indian market: Twilio trial accounts restrict outbound SMS to verified numbers only, and even on paid plans, carrier-level DND filtering silently accepts the API request (HTTP 201) while dropping the message. The initial implementation logged "SMS sent" on a 201 response, masking these failures entirely. The revised version polls the message status after dispatch and raises explicitly on `undelivered` or `failed`, so the demo UI reflects actual delivery state rather than API acceptance.
 
@@ -198,22 +219,27 @@ SMS delivery surfaced a late-stage constraint specific to the Indian market: Twi
 
 ## Technical Reflection
 
-**Constraints encountered**
+### Constraints encountered
 
-The Twilio synchronous client and Slack SDK's `WebClient` are both blocking. Running them directly in an async FastAPI handler would stall the event loop. All three notification actions use `asyncio.to_thread` to offload blocking I/O to a thread pool, keeping the event loop free for concurrent requests. The Anthropic client in `slack_mcp.py` was initially instantiated as the synchronous `Anthropic()` class inside an async function — a subtle bug that compiled and ran without error but blocked the event loop on every Slack MCP call. It was corrected to `AsyncAnthropic()` with `await`.
+| Problem | Root cause | Fix applied |
+|---------|-----------|-------------|
+| Blocking I/O in async handlers | Twilio + Slack `WebClient` are synchronous | Wrapped all three actions in `asyncio.to_thread` |
+| Event loop blocked on Slack MCP calls | `Anthropic()` (sync) instantiated inside async function | Switched to `AsyncAnthropic()` with `await` |
 
-**Potential failure points under scale**
+### Potential failure points under scale
 
-The Twilio and Slack clients are module-level singletons. Under high concurrency, both are thread-safe per their respective SDK documentation, but they hold persistent connection pools that will exhaust under sustained parallel load without connection limits. The Gmail SMTP path opens and closes a new connection on every email — this does not pool and will not scale horizontally without a queue in front of it.
+| Area | Risk | Mitigation needed |
+|------|------|-------------------|
+| Twilio + Slack clients | Module-level singletons with connection pools that exhaust under sustained parallel load | Add connection limits |
+| Gmail SMTP | Opens a new connection per email — does not pool | Put a queue in front of it |
+| Webhook idempotency | No deduplication check — Razorpay retries on non-2xx cause duplicate links + messages | Add a deduplication layer keyed on `payment_id` |
+| Config loading | All env vars loaded at import time via `os.environ[...]` — missing var raises `KeyError` at startup, app cannot start with incomplete config | Acceptable fail-fast behaviour; no graceful degradation path |
 
-The webhook endpoint has no idempotency check. If Razorpay retries a webhook (which it does on non-2xx responses or timeouts), the system will create a second payment link and send duplicate SMS/email/Slack messages to the customer for the same failed payment. At low volume this is acceptable; at scale it requires a deduplication layer keyed on `payment_id`.
+### Long-term maintenance considerations
 
-All environment variables are loaded at import time in `config.py` using `os.environ[...]`. A missing variable raises `KeyError` during startup rather than at request time — this is the correct failure mode for a server, but means the application cannot start at all with an incomplete configuration. There is no partial-startup or graceful degradation path for missing credentials.
-
-**Long-term maintenance considerations**
-
-The `message_generator.py` prompt is hardcoded with the business name and product category from `BUSINESS_NAME`. If the business context changes, the system prompt and user prompt both need updating together. The model is pinned to `gpt-4o-mini` — OpenAI model deprecations will require a manual update.
-
-The MCP-based Slack path (`slack_mcp.py`) spawns an `npx` subprocess per call, which introduces Node.js as a runtime dependency and adds 2–3 seconds of cold-start latency per alert. It is architecturally interesting but not suitable for production alerting at any meaningful volume. The direct SDK path in `slack.py` is the production implementation.
-
-The demo UI has no authentication. On a public deployment, any caller who discovers the `/demo/simulate` endpoint can trigger real SMS and email sends against live credentials. Before deploying to a public URL, the endpoint should be gated behind a secret token or removed from the build entirely.
+| Component | Concern |
+|-----------|---------|
+| `message_generator.py` | Prompt hardcodes business name and product category from `BUSINESS_NAME` — both system and user prompt need updating together if context changes |
+| `message_generator.py` | Model pinned to `gpt-4o-mini` — OpenAI deprecations require a manual update |
+| `slack_mcp.py` | Spawns an `npx` subprocess per call, adding Node.js as a runtime dependency and 2–3 seconds of cold-start latency — architecturally interesting but not suitable for production at any volume; `slack.py` is the production path |
+| `/demo/simulate` endpoint | No authentication — any caller who discovers the endpoint on a public deployment can trigger real SMS and email sends against live credentials; gate behind a secret token or remove before public deployment |

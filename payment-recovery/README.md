@@ -160,6 +160,38 @@ payment-recovery/
 
 ---
 
+## How This Works in Production
+
+**Clients never touch this code.** You deploy it once, connect it to their Razorpay account, and it runs on its own.
+
+```
+Client signs up → you save their Razorpay keys
+               → you add your webhook URL to their Razorpay dashboard
+               → Razorpay calls your server every time a payment fails
+               → customer gets SMS + email, client's team gets a Slack alert
+```
+
+The client keeps using Razorpay exactly as before. This just listens in the background.
+
+### What to add before going live
+
+| Area | What to add | Why |
+|------|-------------|-----|
+| **Job queue** | Celery + Redis | If 100 payments fail at once, a queue handles them one by one instead of crashing your server |
+| **Duplicate check** | Save each webhook ID after processing | Razorpay resends webhooks if your server is slow — this stops the customer getting two SMS messages |
+| **Already paid check** | Check payment status before sending | Customer might have retried and paid already — no point sending a recovery message |
+| **One config per client** | Store keys + branding per client in a DB | Each client has their own Razorpay keys, logo, and Slack channel |
+| **Better email sender** | SendGrid or AWS SES instead of Gmail | Gmail stops after ~500 emails a day. SES handles millions |
+| **SMS sender ID** | Register a DLT sender ID with TRAI | Indian carriers silently drop SMS from unregistered sender IDs |
+| **Error tracking** | Sentry or Datadog | Know immediately if SMS or email starts failing |
+| **Recovery dashboard** | Show how much money was recovered per client | Makes your value obvious — easy to justify the fee |
+
+### The business case
+
+You charge a monthly fee or a cut of recovered payments (usually 5-15%). Every rupee recovered is money the client would have lost. Simple pitch: *"we recovered ₹40,000 for you last month, our fee is ₹2,000."*
+
+---
+
 ## Tech Stack
 
 - **FastAPI**: web framework

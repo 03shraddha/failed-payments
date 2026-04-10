@@ -592,6 +592,25 @@ HTML = """<!DOCTYPE html>
     <div class="section-label">why it matters</div>
     <div class="section-title">every failed payment is a<br>sale you're about to lose.</div>
     <div class="section-body">most businesses do nothing when a payment fails. the customer gets confused, gives up, and buys elsewhere. this system fights back, automatically.</div>
+    <!-- How it fits in -->
+    <div style="background:#F0F7FF;border:1px solid #BFDBFE;border-radius:16px;padding:24px 28px;margin-bottom:36px;">
+      <div style="font-size:13px;font-weight:700;color:#0D94FB;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:16px;">how it fits into any business</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;align-items:flex-start;gap:12px;">
+          <div style="background:#012652;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px;">1</div>
+          <div style="font-size:15px;color:#374151;line-height:1.5;">client signs up and gives you their Razorpay API keys</div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;">
+          <div style="background:#012652;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px;">2</div>
+          <div style="font-size:15px;color:#374151;line-height:1.5;">you register this app's webhook URL on their Razorpay account — takes 2 minutes</div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;">
+          <div style="background:#22C55E;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px;">✓</div>
+          <div style="font-size:15px;color:#374151;line-height:1.5;"><strong>done.</strong> it just runs. client keeps using Razorpay exactly as before.</div>
+        </div>
+      </div>
+    </div>
+
     <div class="why-grid">
       <div class="why-card">
         <span class="why-emoji">😤</span>
@@ -739,6 +758,9 @@ HTML = """<!DOCTYPE html>
     document.getElementById('results').classList.add('show');
     document.getElementById('results').scrollIntoView({ behavior:'smooth', block:'nearest' });
   }
+
+  // Always start at page 1 (hero) on load
+  window.addEventListener('load', () => window.scrollTo({ top: 0, behavior: 'instant' }));
 
   function doCopy(url, e) {
     navigator.clipboard.writeText(url).then(() => {

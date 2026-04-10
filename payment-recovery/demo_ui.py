@@ -215,73 +215,74 @@ HTML = """<!DOCTYPE html>
   /* ── Hero (page 1) ── */
   .hero {
     background: #fff;
-    padding: 0 24px;
+    padding: 0 24px 24px;
     text-align: center;
     border-bottom: 1px solid #F3F4F6;
     min-height: calc(100vh - 52px);
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
     scroll-snap-align: start;
+    overflow: hidden;
   }
   .hero-chip {
     display: inline-flex; align-items: center; gap: 6px;
     background: #EFF6FF; color: #1D4ED8;
     border: 1px solid #BFDBFE;
-    font-size: 14px; font-weight: 600;
-    padding: 5px 14px; border-radius: 100px;
-    margin-bottom: 32px; letter-spacing: 0.01em;
+    font-size: 12px; font-weight: 600;
+    padding: 4px 12px; border-radius: 100px;
+    margin-bottom: 16px; letter-spacing: 0.01em;
   }
   .hero h1 {
-    font-size: clamp(44px, 7vw, 76px);
+    font-size: clamp(32px, 5vw, 56px);
     font-weight: 800; letter-spacing: -0.04em;
     line-height: 1.05; color: #012652;
-    margin-bottom: 24px;
+    margin-bottom: 14px;
   }
   .hero h1 em { font-style: normal; color: #0D94FB; }
   .hero-desc {
-    font-size: 22px; color: #6B7280; font-weight: 400;
-    max-width: 560px; margin: 0 auto 20px; line-height: 1.6;
+    font-size: 17px; color: #6B7280; font-weight: 400;
+    max-width: 500px; margin: 0 auto 10px; line-height: 1.5;
   }
   .hero-sub {
-    font-size: 17px; color: #9CA3AF;
-    max-width: 500px; margin: 0 auto 64px; line-height: 1.6;
+    font-size: 13px; color: #9CA3AF;
+    max-width: 460px; margin: 0 auto 28px; line-height: 1.55;
   }
 
   /* ── Webhook callout ── */
   .webhook-callout {
-    display: inline-flex; align-items: flex-start; gap: 14px; text-align: left;
+    display: inline-flex; align-items: flex-start; gap: 12px; text-align: left;
     background: #F8FAFF; border: 1px solid #E0E7FF;
-    border-radius: 16px; padding: 20px 26px;
-    max-width: 580px; margin: 0 auto 56px;
+    border-radius: 14px; padding: 14px 20px;
+    max-width: 540px; margin: 0 auto 28px;
   }
-  .wh-icon { font-size: 26px; flex-shrink: 0; margin-top: 1px; }
-  .wh-title { font-size: 16px; font-weight: 700; color: #012652; margin-bottom: 6px; }
-  .wh-body { font-size: 15px; color: #6B7280; line-height: 1.6; }
+  .wh-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+  .wh-title { font-size: 13px; font-weight: 700; color: #012652; margin-bottom: 4px; }
+  .wh-body { font-size: 13px; color: #6B7280; line-height: 1.5; }
   .wh-body code {
     background: #EEF2FF; color: #4338CA;
-    padding: 2px 6px; border-radius: 4px;
-    font-family: 'SF Mono', Consolas, monospace; font-size: 13px;
+    padding: 1px 5px; border-radius: 4px;
+    font-family: 'SF Mono', Consolas, monospace; font-size: 11.5px;
   }
 
   /* ── Flow ── */
   .flow { display: flex; align-items: center; justify-content: center; gap: 0; flex-wrap: wrap; }
-  .flow-node { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .flow-node { display: flex; flex-direction: column; align-items: center; gap: 7px; }
   .flow-ball {
-    width: 64px; height: 64px; border-radius: 18px;
-    display: flex; align-items: center; justify-content: center; font-size: 28px;
+    width: 48px; height: 48px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   }
   .fb-red   { background: #FFF1F0; }
   .fb-blue  { background: #EFF6FF; }
   .fb-green { background: #F0FDF4; }
-  .flow-tag { font-size: 13px; font-weight: 600; color: #9CA3AF; letter-spacing: 0.03em; }
-  .flow-arrow { color: #D1D5DB; font-size: 22px; margin: 0 16px; padding-bottom: 24px; }
-  .flow-outs { display: flex; flex-direction: column; gap: 8px; }
+  .flow-tag { font-size: 11px; font-weight: 600; color: #9CA3AF; letter-spacing: 0.03em; }
+  .flow-arrow { color: #D1D5DB; font-size: 18px; margin: 0 10px; padding-bottom: 18px; }
+  .flow-outs { display: flex; flex-direction: column; gap: 6px; }
   .flow-out-pill {
-    display: flex; align-items: center; gap: 8px;
+    display: flex; align-items: center; gap: 7px;
     background: #fff; border: 1px solid #E5E7EB;
-    border-radius: 100px; padding: 8px 18px;
-    font-size: 15px; font-weight: 500; color: #374151;
+    border-radius: 100px; padding: 6px 14px;
+    font-size: 13px; font-weight: 500; color: #374151;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
   }
 

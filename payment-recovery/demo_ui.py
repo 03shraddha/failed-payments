@@ -603,7 +603,7 @@ HTML = """<!DOCTYPE html>
         </div>
         <div style="display:flex;align-items:flex-start;gap:12px;">
           <div style="background:#012652;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px;">2</div>
-          <div style="font-size:15px;color:#374151;line-height:1.5;">you register this app's webhook URL on their Razorpay account — takes 2 minutes</div>
+          <div style="font-size:15px;color:#374151;line-height:1.5;">you register this app's webhook URL on their Razorpay account (takes 2 minutes)</div>
         </div>
         <div style="display:flex;align-items:flex-start;gap:12px;">
           <div style="background:#22C55E;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px;">✓</div>

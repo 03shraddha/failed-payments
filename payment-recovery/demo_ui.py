@@ -170,6 +170,8 @@ HTML = """<!DOCTYPE html>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
+  html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+
   body {
     font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     background: #F4F6FB;
@@ -210,72 +212,76 @@ HTML = """<!DOCTYPE html>
   }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
-  /* ── Hero ── */
+  /* ── Hero (page 1) ── */
   .hero {
     background: #fff;
-    padding: 80px 24px 72px;
+    padding: 0 24px;
     text-align: center;
     border-bottom: 1px solid #F3F4F6;
+    min-height: calc(100vh - 52px);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    scroll-snap-align: start;
   }
   .hero-chip {
     display: inline-flex; align-items: center; gap: 6px;
     background: #EFF6FF; color: #1D4ED8;
     border: 1px solid #BFDBFE;
-    font-size: 12px; font-weight: 600;
-    padding: 4px 12px; border-radius: 100px;
-    margin-bottom: 28px; letter-spacing: 0.01em;
+    font-size: 14px; font-weight: 600;
+    padding: 5px 14px; border-radius: 100px;
+    margin-bottom: 32px; letter-spacing: 0.01em;
   }
   .hero h1 {
-    font-size: clamp(36px, 5.5vw, 60px);
+    font-size: clamp(44px, 7vw, 76px);
     font-weight: 800; letter-spacing: -0.04em;
     line-height: 1.05; color: #012652;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
   }
   .hero h1 em { font-style: normal; color: #0D94FB; }
   .hero-desc {
-    font-size: 18px; color: #6B7280; font-weight: 400;
-    max-width: 500px; margin: 0 auto 16px; line-height: 1.6;
+    font-size: 22px; color: #6B7280; font-weight: 400;
+    max-width: 560px; margin: 0 auto 20px; line-height: 1.6;
   }
   .hero-sub {
-    font-size: 14px; color: #9CA3AF;
-    max-width: 440px; margin: 0 auto 56px; line-height: 1.6;
+    font-size: 17px; color: #9CA3AF;
+    max-width: 500px; margin: 0 auto 64px; line-height: 1.6;
   }
 
   /* ── Webhook callout ── */
   .webhook-callout {
     display: inline-flex; align-items: flex-start; gap: 14px; text-align: left;
     background: #F8FAFF; border: 1px solid #E0E7FF;
-    border-radius: 16px; padding: 18px 22px;
-    max-width: 520px; margin: 0 auto 52px;
+    border-radius: 16px; padding: 20px 26px;
+    max-width: 580px; margin: 0 auto 56px;
   }
-  .wh-icon { font-size: 22px; flex-shrink: 0; margin-top: 1px; }
-  .wh-title { font-size: 13px; font-weight: 700; color: #012652; margin-bottom: 4px; }
-  .wh-body { font-size: 13px; color: #6B7280; line-height: 1.55; }
+  .wh-icon { font-size: 26px; flex-shrink: 0; margin-top: 1px; }
+  .wh-title { font-size: 16px; font-weight: 700; color: #012652; margin-bottom: 6px; }
+  .wh-body { font-size: 15px; color: #6B7280; line-height: 1.6; }
   .wh-body code {
     background: #EEF2FF; color: #4338CA;
-    padding: 1px 5px; border-radius: 4px;
-    font-family: 'SF Mono', Consolas, monospace; font-size: 11.5px;
+    padding: 2px 6px; border-radius: 4px;
+    font-family: 'SF Mono', Consolas, monospace; font-size: 13px;
   }
 
   /* ── Flow ── */
   .flow { display: flex; align-items: center; justify-content: center; gap: 0; flex-wrap: wrap; }
-  .flow-node { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .flow-node { display: flex; flex-direction: column; align-items: center; gap: 10px; }
   .flow-ball {
-    width: 52px; height: 52px; border-radius: 16px;
-    display: flex; align-items: center; justify-content: center; font-size: 22px;
+    width: 64px; height: 64px; border-radius: 18px;
+    display: flex; align-items: center; justify-content: center; font-size: 28px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   }
   .fb-red   { background: #FFF1F0; }
   .fb-blue  { background: #EFF6FF; }
   .fb-green { background: #F0FDF4; }
-  .flow-tag { font-size: 11px; font-weight: 600; color: #9CA3AF; letter-spacing: 0.03em; }
-  .flow-arrow { color: #D1D5DB; font-size: 18px; margin: 0 12px; padding-bottom: 20px; }
-  .flow-outs { display: flex; flex-direction: column; gap: 6px; }
+  .flow-tag { font-size: 13px; font-weight: 600; color: #9CA3AF; letter-spacing: 0.03em; }
+  .flow-arrow { color: #D1D5DB; font-size: 22px; margin: 0 16px; padding-bottom: 24px; }
+  .flow-outs { display: flex; flex-direction: column; gap: 8px; }
   .flow-out-pill {
-    display: flex; align-items: center; gap: 7px;
+    display: flex; align-items: center; gap: 8px;
     background: #fff; border: 1px solid #E5E7EB;
-    border-radius: 100px; padding: 6px 14px;
-    font-size: 13px; font-weight: 500; color: #374151;
+    border-radius: 100px; padding: 8px 18px;
+    font-size: 15px; font-weight: 500; color: #374151;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
   }
 
@@ -299,51 +305,64 @@ HTML = """<!DOCTYPE html>
   .cd-gmail { background: #EA4335; }
   .cd-slack { background: #611f69; }
 
-  /* ── Why section ── */
-  .why-section { background: #fff; padding: 72px 24px; }
-  .why-inner { max-width: 700px; margin: 0 auto; }
-  .section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #0D94FB; margin-bottom: 10px; }
-  .section-title { font-size: clamp(26px, 4vw, 36px); font-weight: 800; color: #012652; letter-spacing: -0.03em; margin-bottom: 8px; line-height: 1.15; }
-  .section-body { font-size: 16px; color: #6B7280; margin-bottom: 44px; line-height: 1.6; }
-  .why-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 14px; }
+  /* ── Why section (page 3) ── */
+  .why-section {
+    background: #fff; padding: 0 24px;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    scroll-snap-align: start;
+  }
+  .why-inner { max-width: 800px; margin: 0 auto; padding: 80px 0; width: 100%; }
+  .section-label { font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #0D94FB; margin-bottom: 12px; }
+  .section-title { font-size: clamp(32px, 5vw, 48px); font-weight: 800; color: #012652; letter-spacing: -0.03em; margin-bottom: 12px; line-height: 1.1; }
+  .section-body { font-size: 20px; color: #6B7280; margin-bottom: 48px; line-height: 1.6; }
+  .why-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
   .why-card {
     background: #F9FAFB; border: 1px solid #F3F4F6;
-    border-radius: 20px; padding: 24px 22px;
+    border-radius: 20px; padding: 28px 26px;
     transition: box-shadow 0.2s;
   }
   .why-card:hover { box-shadow: 0 4px 20px rgba(1,38,82,0.08); }
-  .why-emoji { font-size: 26px; margin-bottom: 12px; display: block; }
-  .why-title { font-size: 15px; font-weight: 700; color: #012652; margin-bottom: 7px; letter-spacing: -0.01em; }
-  .why-desc { font-size: 13px; color: #6B7280; line-height: 1.6; }
+  .why-emoji { font-size: 32px; margin-bottom: 14px; display: block; }
+  .why-title { font-size: 18px; font-weight: 700; color: #012652; margin-bottom: 9px; letter-spacing: -0.01em; }
+  .why-desc { font-size: 15px; color: #6B7280; line-height: 1.65; }
   .why-tag {
-    display: inline-block; margin-top: 12px;
+    display: inline-block; margin-top: 14px;
     background: #EFF6FF; color: #1D4ED8;
-    font-size: 12px; font-weight: 600;
-    padding: 3px 10px; border-radius: 6px;
+    font-size: 13px; font-weight: 600;
+    padding: 4px 12px; border-radius: 6px;
   }
 
-  /* ── Demo section ── */
-  .demo-section { background: #F9FAFB; padding: 64px 24px 80px; border-top: 1px solid #F3F4F6; }
-  .demo-inner { max-width: 580px; margin: 0 auto; }
+  /* ── Demo section (page 2) ── */
+  .demo-section {
+    background: #F9FAFB; padding: 0 24px;
+    border-top: 1px solid #F3F4F6;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    scroll-snap-align: start;
+  }
+  .demo-inner { max-width: 600px; margin: 0 auto; padding: 72px 0; width: 100%; }
 
   /* ── Card ── */
   .card {
-    background: #fff; border-radius: 20px; padding: 28px;
-    margin-bottom: 14px;
+    background: #fff; border-radius: 20px; padding: 32px;
+    margin-bottom: 16px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
     border: 1px solid #F3F4F6;
   }
   .card-label {
-    font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
-    text-transform: uppercase; color: #9CA3AF; margin-bottom: 20px;
+    font-size: 13px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: #9CA3AF; margin-bottom: 22px;
   }
 
   /* ── Pills ── */
-  .pills { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 22px; }
+  .pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
   .pill {
-    padding: 8px 16px; border-radius: 100px;
+    padding: 10px 20px; border-radius: 100px;
     border: 1.5px solid #E5E7EB; background: #fff;
-    font-size: 13px; font-weight: 600; color: #6B7280;
+    font-size: 15px; font-weight: 600; color: #6B7280;
     cursor: pointer; transition: all 0.15s; font-family: inherit;
     white-space: nowrap;
   }
@@ -351,24 +370,24 @@ HTML = """<!DOCTYPE html>
   .pill.active { background: #012652; border-color: #012652; color: #fff; }
 
   /* ── Field ── */
-  .field { margin-bottom: 18px; }
-  .field label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 7px; }
+  .field { margin-bottom: 20px; }
+  .field label { display: block; font-size: 15px; font-weight: 600; color: #374151; margin-bottom: 8px; }
   .field input {
-    width: 100%; padding: 13px 15px;
+    width: 100%; padding: 15px 17px;
     border: 1.5px solid #E5E7EB; border-radius: 12px;
-    font-size: 15px; font-family: inherit; color: #111827;
+    font-size: 17px; font-family: inherit; color: #111827;
     background: #F9FAFB; outline: none; transition: all 0.15s;
   }
   .field input:focus { border-color: #0D94FB; background: #fff; box-shadow: 0 0 0 3px rgba(13,148,251,0.1); }
   .field input::placeholder { color: #9CA3AF; }
-  .field .hint { margin-top: 6px; font-size: 12px; color: #9CA3AF; line-height: 1.5; }
+  .field .hint { margin-top: 7px; font-size: 13px; color: #9CA3AF; line-height: 1.5; }
 
   /* ── Button ── */
   .btn {
-    width: 100%; padding: 15px;
+    width: 100%; padding: 18px;
     background: #012652; color: #fff;
     border: none; border-radius: 14px;
-    font-size: 15px; font-weight: 700; font-family: inherit;
+    font-size: 17px; font-weight: 700; font-family: inherit;
     cursor: pointer; transition: all 0.15s;
     display: flex; align-items: center; justify-content: center; gap: 8px;
     letter-spacing: -0.01em;
@@ -408,50 +427,50 @@ HTML = """<!DOCTYPE html>
   #results.show { display: block; animation: fadeUp 0.3s ease; }
   @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
 
-  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 18px; }
-  .info-cell { background: #F9FAFB; border-radius: 12px; padding: 12px 14px; border: 1px solid #F3F4F6; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+  .info-cell { background: #F9FAFB; border-radius: 12px; padding: 14px 16px; border: 1px solid #F3F4F6; }
   .info-cell.full { grid-column: 1/-1; }
-  .ic-label { font-size: 10px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
-  .ic-value { font-size: 14px; font-weight: 600; color: #012652; word-break: break-all; }
+  .ic-label { font-size: 11px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+  .ic-value { font-size: 15px; font-weight: 600; color: #012652; word-break: break-all; }
 
-  .action-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+  .action-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
   .action-row {
-    display: flex; align-items: center; gap: 12px;
-    padding: 13px 15px; border-radius: 14px;
+    display: flex; align-items: center; gap: 14px;
+    padding: 15px 17px; border-radius: 14px;
     background: #F9FAFB; border: 1px solid #F3F4F6;
   }
-  .ar-icon { font-size: 20px; width: 32px; text-align: center; flex-shrink: 0; }
+  .ar-icon { font-size: 22px; width: 36px; text-align: center; flex-shrink: 0; }
   .ar-body { flex: 1; min-width: 0; }
-  .ar-name { font-size: 14px; font-weight: 700; color: #012652; }
-  .ar-what { font-size: 12px; color: #6B7280; margin-top: 1px; }
-  .ar-detail { font-size: 11px; color: #9CA3AF; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 100px; flex-shrink: 0; }
+  .ar-name { font-size: 16px; font-weight: 700; color: #012652; }
+  .ar-what { font-size: 13px; color: #6B7280; margin-top: 2px; }
+  .ar-detail { font-size: 12px; color: #9CA3AF; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .badge { font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 100px; flex-shrink: 0; }
   .b-sent    { background: #F0FDF4; color: #15803D; }
   .b-failed  { background: #FFF1F2; color: #BE123C; }
   .b-skipped { background: #F3F4F6; color: #6B7280; }
 
   .link-row {
-    display: flex; align-items: center; gap: 12px;
+    display: flex; align-items: center; gap: 14px;
     background: #F0F9FF; border: 1px solid #BAE6FD;
-    border-radius: 14px; padding: 14px 16px;
+    border-radius: 14px; padding: 16px 18px;
   }
-  .lr-icon { font-size: 20px; flex-shrink: 0; }
+  .lr-icon { font-size: 22px; flex-shrink: 0; }
   .lr-body { flex: 1; min-width: 0; }
-  .lr-label { font-size: 10px; font-weight: 700; color: #0369A1; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
-  .lr-url { font-size: 12px; color: #0D94FB; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .lr-label { font-size: 11px; font-weight: 700; color: #0369A1; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+  .lr-url { font-size: 13px; color: #0D94FB; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .copy-btn {
     background: #0D94FB; color: #fff; border: none;
-    border-radius: 8px; padding: 6px 12px;
-    font-size: 12px; font-weight: 700; cursor: pointer;
+    border-radius: 8px; padding: 8px 16px;
+    font-size: 13px; font-weight: 700; cursor: pointer;
     font-family: inherit; transition: opacity 0.15s; flex-shrink: 0;
   }
   .copy-btn:hover { opacity: 0.85; }
 
   .err-bar {
     background: #FFF1F2; border: 1px solid #FECDD3;
-    border-radius: 10px; padding: 12px 14px;
-    color: #BE123C; font-size: 13px; font-weight: 500;
-    display: none; margin-top: 10px;
+    border-radius: 10px; padding: 14px 16px;
+    color: #BE123C; font-size: 15px; font-weight: 500;
+    display: none; margin-top: 12px;
   }
 </style>
 </head>
@@ -471,50 +490,7 @@ HTML = """<!DOCTYPE html>
   </div>
 </nav>
 
-<!-- Demo -->
-<section class="demo-section">
-  <div class="demo-inner">
-    <div class="section-label">try it live</div>
-    <div class="section-title" style="margin-bottom:6px;">see it fire in real time.</div>
-    <div class="section-body" style="margin-bottom:28px;">pick a scenario, enter a phone number, and watch SMS + email + Slack all trigger at once.</div>
-
-    <div class="card">
-      <div class="card-label">simulate a failed payment</div>
-      <div class="pills">
-        <button class="pill active" data-scenario="upi_timeout">📱 UPI timeout</button>
-        <button class="pill" data-scenario="card_decline">💳 card declined</button>
-        <button class="pill" data-scenario="netbanking_failure">🏦 net banking</button>
-      </div>
-      <div class="field">
-        <label>customer phone number</label>
-        <input type="tel" id="phoneInput" placeholder="+91 98765 43210">
-        <div class="hint">use a Twilio-verified number to actually receive the SMS. leave blank to use the demo number.</div>
-      </div>
-      <button class="btn" id="simulateBtn" onclick="runSimulation()">
-        <span class="spinner" id="spinner"></span>
-        <span id="btnText">simulate failed payment</span>
-      </button>
-      <div class="err-bar" id="errBar"></div>
-    </div>
-
-    <!-- Webhook log -->
-    <div class="wh-log" id="whLog">
-      <div class="wh-log-title">webhook payload · what Razorpay sends</div>
-      <div id="logLines"></div>
-    </div>
-
-    <!-- Results -->
-    <div class="card" id="results">
-      <div class="card-label">what just happened</div>
-      <div class="info-grid" id="infoGrid"></div>
-      <div id="aiMessage"></div>
-      <div class="action-list" id="actionList"></div>
-      <div id="linkRow"></div>
-    </div>
-  </div>
-</section>
-
-<!-- Hero -->
+<!-- Hero (page 1) -->
 <section class="hero">
   <div class="hero-chip">⚡ built on Razorpay webhooks</div>
   <h1>your customer's payment<br>just failed. <em>now what?</em></h1>
@@ -551,6 +527,49 @@ HTML = """<!DOCTYPE html>
       <div class="flow-out-pill">📱 SMS to customer</div>
       <div class="flow-out-pill">✉️ email to customer</div>
       <div class="flow-out-pill">🔔 Slack alert for you</div>
+    </div>
+  </div>
+</section>
+
+<!-- Demo (page 2) -->
+<section class="demo-section">
+  <div class="demo-inner">
+    <div class="section-label">try it live</div>
+    <div class="section-title" style="margin-bottom:8px;">see it fire in real time.</div>
+    <div class="section-body" style="margin-bottom:32px;">pick a scenario, enter a phone number, and watch SMS + email + Slack all trigger at once.</div>
+
+    <div class="card">
+      <div class="card-label">simulate a failed payment</div>
+      <div class="pills">
+        <button class="pill active" data-scenario="upi_timeout">📱 UPI timeout</button>
+        <button class="pill" data-scenario="card_decline">💳 card declined</button>
+        <button class="pill" data-scenario="netbanking_failure">🏦 net banking</button>
+      </div>
+      <div class="field">
+        <label>customer phone number</label>
+        <input type="tel" id="phoneInput" placeholder="+91 98765 43210">
+        <div class="hint">use a Twilio-verified number to actually receive the SMS. leave blank to use the demo number.</div>
+      </div>
+      <button class="btn" id="simulateBtn" onclick="runSimulation()">
+        <span class="spinner" id="spinner"></span>
+        <span id="btnText">simulate failed payment</span>
+      </button>
+      <div class="err-bar" id="errBar"></div>
+    </div>
+
+    <!-- Webhook log -->
+    <div class="wh-log" id="whLog">
+      <div class="wh-log-title">webhook payload · what Razorpay sends</div>
+      <div id="logLines"></div>
+    </div>
+
+    <!-- Results -->
+    <div class="card" id="results">
+      <div class="card-label">what just happened</div>
+      <div class="info-grid" id="infoGrid"></div>
+      <div id="aiMessage"></div>
+      <div class="action-list" id="actionList"></div>
+      <div id="linkRow"></div>
     </div>
   </div>
 </section>

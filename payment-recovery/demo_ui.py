@@ -84,17 +84,15 @@ async def simulate(req: SimulateRequest):
     reason = s["error"]
     method = s["method"]
 
-    # 1. Create a Razorpay QR code — no contact form, just scan and pay
-    from razorpay_client import create_qr_code
-    qr_image_url, qr_id = await create_qr_code(
+    # 1. Create a fresh Razorpay payment link with customer pre-filled
+    from razorpay_client import create_payment_link
+    link = await create_payment_link(
+        order_id=s["order_id"],
         amount_paise=s["amount"],
-        description=f"retry payment · {s['label']} · Rs.{s['amount']//100}",
+        contact=phone,
+        email=email,
+        description=f"retry: {s['label']} · Rs.{s['amount']//100}",
     )
-    # Link points to our own checkout page — absolute URL so it works in email too
-    import urllib.parse
-    base = "http://localhost:8000"
-    checkout_link = f"{base}/demo/checkout?qr={urllib.parse.quote(qr_image_url)}&amount={s['amount']//100}&label={urllib.parse.quote(s['label'])}"
-    link = checkout_link
 
     # 2. Ask OpenAI to craft personalised jewellery-shop recovery messages
     msgs = await generate_recovery_messages(

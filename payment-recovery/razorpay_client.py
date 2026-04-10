@@ -69,7 +69,8 @@ async def create_payment_link(
         "description": description,
         # Unix timestamp: must be at least 15 minutes in the future
         "expire_by": int(time.time()) + 86400,   # 24 hours from now
-        "reference_id": order_id,
+        # Append timestamp so repeated demo runs don't clash (Razorpay rejects duplicate reference_ids)
+        "reference_id": f"{order_id}_{int(time.time())}",
         "notify": {
             # Don't double-notify via Razorpay: we handle comms ourselves
             "sms": False,
@@ -78,14 +79,14 @@ async def create_payment_link(
         "reminder_enable": False,
     }
 
-    # Attach customer details only when available
-    customer: dict = {}
+    # Attach customer details — name+contact+email causes Razorpay to pre-fill
+    # the checkout form so the customer doesn't have to type their number
+    customer: dict = {"name": "Customer"}
     if contact:
         customer["contact"] = contact
     if email:
         customer["email"] = email
-    if customer:
-        payload["customer"] = customer
+    payload["customer"] = customer
 
     try:
         async with httpx.AsyncClient(timeout=8.0) as client:

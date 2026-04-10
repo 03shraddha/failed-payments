@@ -32,14 +32,19 @@ class RecoveryMessages:
     email_body: str   # 2-3 short paragraphs, plain text
 
 
+def _clean(text: str) -> str:
+    """Strip em/en dashes and lowercase the string."""
+    return text.replace("—", ",").replace("–", ",").strip()
+
+
 def _fallback(amount: float, reason: str, link: str) -> RecoveryMessages:
     """Used when OpenAI is unavailable."""
     return RecoveryMessages(
         sms=(
             f"Hi! Your payment of Rs.{amount:.0f} at {BUSINESS_NAME} didn't go through. "
-            f"No worries — retry here: {link}"
+            f"No worries, retry here: {link}"
         ),
-        email_subject=f"Your order payment didn't go through — here's your retry link",
+        email_subject=f"your order payment didn't go through, here's your retry link",
         email_body=(
             f"Hi there,\n\n"
             f"Your payment of Rs.{amount:.2f} couldn't be processed. "
@@ -151,8 +156,13 @@ def _parse_openai_response(raw: str, amount: float, reason: str, link: str) -> R
     if not sms:
         sms = f"Hi! Your Rs.{amount:.0f} payment didn't go through. Retry: {link}"
     if not email_subject:
-        email_subject = "Your payment didn't go through — retry here"
+        email_subject = "your payment didn't go through, retry here"
     if not email_body:
         email_body = f"Your payment of Rs.{amount:.2f} failed. Reason: {reason}\n\nRetry: {link}"
 
-    return RecoveryMessages(sms=sms, email_subject=email_subject, email_body=email_body)
+    # Strip em/en dashes from AI output and lowercase the subject
+    return RecoveryMessages(
+        sms=_clean(sms),
+        email_subject=_clean(email_subject).lower(),
+        email_body=email_body.replace("—", ",").replace("–", ","),
+    )

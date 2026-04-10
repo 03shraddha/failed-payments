@@ -84,8 +84,15 @@ async def simulate(req: SimulateRequest):
     reason = s["error"]
     method = s["method"]
 
-    # 1. Use the demo link directly: avoids hitting Razorpay with fake order IDs
-    link = s["demo_link"]
+    # 1. Create a fresh Razorpay payment link so the button always works
+    from razorpay_client import create_payment_link
+    link = await create_payment_link(
+        order_id=s["order_id"],
+        amount_paise=s["amount"],
+        contact=phone,
+        email=email,
+        description=f"Demo: retry payment for {s['order_id']}",
+    )
 
     # 2. Ask OpenAI to craft personalised jewellery-shop recovery messages
     msgs = await generate_recovery_messages(
@@ -675,9 +682,9 @@ HTML = """<!DOCTYPE html>
     }
 
     const am = {
-      sms:   { icon:'📱', name:'SMS to customer',   what:'sent AI-crafted text with retry link',      detail: d.customer_phone },
+      sms:   { icon:'📱', name:'sms to customer',   what:'sent AI-crafted text with retry link',      detail: d.customer_phone },
       email: { icon:'✉️',  name:'email to customer', what:'sent AI-crafted recovery email',            detail: d.customer_email },
-      slack: { icon:'🔔', name:'Slack alert',        what:'posted to #payment-ops with full details',  detail: '#payment-ops' },
+      slack: { icon:'🔔', name:'slack alert',        what:'posted to #payment-ops with full details',  detail: '#payment-ops' },
     };
     // Filter out ai_message — it's metadata, not an action
     document.getElementById('actionList').innerHTML = Object.entries(d.actions)

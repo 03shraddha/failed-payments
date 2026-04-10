@@ -84,15 +84,17 @@ async def simulate(req: SimulateRequest):
     reason = s["error"]
     method = s["method"]
 
-    # 1. Create a fresh Razorpay payment link so the button always works
-    from razorpay_client import create_payment_link
-    link = await create_payment_link(
-        order_id=s["order_id"],
+    # 1. Create a Razorpay QR code — no contact form, just scan and pay
+    from razorpay_client import create_qr_code
+    qr_image_url, qr_id = await create_qr_code(
         amount_paise=s["amount"],
-        contact=phone,
-        email=email,
-        description=f"Demo: retry payment for {s['order_id']}",
+        description=f"retry payment · {s['label']} · Rs.{s['amount']//100}",
     )
+    # Link points to our own checkout page — absolute URL so it works in email too
+    import urllib.parse
+    base = "http://localhost:8000"
+    checkout_link = f"{base}/demo/checkout?qr={urllib.parse.quote(qr_image_url)}&amount={s['amount']//100}&label={urllib.parse.quote(s['label'])}"
+    link = checkout_link
 
     # 2. Ask OpenAI to craft personalised jewellery-shop recovery messages
     msgs = await generate_recovery_messages(
@@ -733,3 +735,65 @@ HTML = """<!DOCTYPE html>
 @router.get("/demo", response_class=HTMLResponse)
 async def demo_page():
     return HTML
+
+
+@router.get("/demo/checkout", response_class=HTMLResponse)
+async def checkout_page(qr: str = "", amount: str = "", label: str = ""):
+    """Shows a clean QR code page — no contact form, just scan and pay."""
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>scan to pay · rzp-demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * {{ margin:0; padding:0; box-sizing:border-box; }}
+  body {{
+    font-family: 'Nunito Sans', -apple-system, sans-serif;
+    background: #F4F6FB; min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+  }}
+  .card {{
+    background: #fff; border-radius: 24px; padding: 40px 36px;
+    box-shadow: 0 4px 32px rgba(1,38,82,0.10);
+    max-width: 380px; width: 100%; text-align: center;
+  }}
+  .brand {{ font-size: 13px; font-weight: 700; color: #9CA3AF; letter-spacing: 0.05em; margin-bottom: 24px; }}
+  .amount {{ font-size: 42px; font-weight: 800; color: #012652; letter-spacing: -0.04em; margin-bottom: 4px; }}
+  .label {{ font-size: 14px; color: #6B7280; margin-bottom: 28px; }}
+  .qr-wrap {{
+    background: #F9FAFB; border: 1px solid #F3F4F6;
+    border-radius: 20px; padding: 20px; margin-bottom: 24px;
+    display: flex; align-items: center; justify-content: center;
+  }}
+  .qr-wrap img {{ width: 220px; height: 220px; border-radius: 8px; }}
+  .hint {{ font-size: 13px; color: #9CA3AF; line-height: 1.6; }}
+  .hint strong {{ color: #374151; }}
+  .rzp-badge {{
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 28px; font-size: 12px; color: #9CA3AF;
+  }}
+  .rzp-dot {{ width: 8px; height: 8px; background: #0D94FB; border-radius: 50%; }}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="brand">rzp-demo · payment recovery</div>
+  <div class="amount">₹{amount}</div>
+  <div class="label">{label} · retry payment</div>
+  <div class="qr-wrap">
+    {"<img src='" + qr + "' alt='UPI QR code' />" if qr else "<div style='color:#9CA3AF;font-size:14px;'>QR unavailable</div>"}
+  </div>
+  <div class="hint">
+    <strong>scan with any UPI app</strong><br>
+    Google Pay · PhonePe · Paytm · BHIM · any bank app
+  </div>
+  <div class="rzp-badge">
+    <div class="rzp-dot"></div>
+    powered by razorpay
+  </div>
+</div>
+</body>
+</html>"""

@@ -7,6 +7,44 @@ from config import RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, RAZORPAY_API_BASE
 logger = logging.getLogger(__name__)
 
 
+async def create_qr_code(
+    amount_paise: int,
+    description: str = "Retry payment",
+) -> tuple[str, str]:
+    """
+    Creates a Razorpay QR code for the given amount.
+    Returns (image_url, qr_id) — image_url is a direct PNG link to the QR code.
+    Falls back to empty strings on failure.
+    """
+    payload = {
+        "type": "upi_qr",
+        "name": description,
+        "usage": "single_use",
+        "fixed_amount": True,
+        "payment_amount": amount_paise,
+        "description": description,
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=8.0) as client:
+            response = await client.post(
+                f"{RAZORPAY_API_BASE}/payments/qr-codes",
+                json=payload,
+                auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET),
+            )
+            response.raise_for_status()
+            data = response.json()
+
+        image_url = data.get("image_url", "")
+        qr_id = data.get("id", "")
+        logger.info("Created QR code: %s", qr_id)
+        return image_url, qr_id
+
+    except Exception as exc:
+        logger.error("Failed to create QR code: %s", exc)
+        return "", ""
+
+
 async def create_payment_link(
     order_id: str,
     amount_paise: int,

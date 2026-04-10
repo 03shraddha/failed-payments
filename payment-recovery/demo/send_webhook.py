@@ -42,7 +42,7 @@ load_dotenv()
 
 SCENARIOS = {
     "upi_timeout": {
-        "description": "Priya's UPI payment timed out — most common failure in India",
+        "description": "Priya's UPI payment timed out - most common failure in India",
         "payload": {
             "entity": "event",
             "account_id": "acc_demo123",
@@ -53,14 +53,14 @@ SCENARIOS = {
                     "entity": {
                         "id": "pay_demo_upi_001",
                         "entity": "payment",
-                        "amount": 249900,       # ₹2,499 — online course purchase
+                        "amount": 249900,       # ₹2,499 - online course purchase
                         "currency": "INR",
                         "status": "failed",
                         "order_id": "order_demo_upi_001",
                         "method": "upi",
                         "email": "priya.sharma@gmail.com",
                         "contact": "+919876543210",
-                        "description": "Python Masterclass — Full Course",
+                        "description": "Python Masterclass - Full Course",
                         "error_code": "BAD_REQUEST_ERROR",
                         "error_description": "Payment was not completed due to a UPI timeout. The transaction was not processed.",
                         "error_source": "customer",
@@ -73,7 +73,7 @@ SCENARIOS = {
         },
     },
     "card_decline": {
-        "description": "Rohan's card was declined — insufficient funds",
+        "description": "Rohan's card was declined - insufficient funds",
         "payload": {
             "entity": "event",
             "account_id": "acc_demo123",
@@ -84,14 +84,14 @@ SCENARIOS = {
                     "entity": {
                         "id": "pay_demo_card_001",
                         "entity": "payment",
-                        "amount": 99900,        # ₹999 — monthly subscription
+                        "amount": 99900,        # ₹999 - monthly subscription
                         "currency": "INR",
                         "status": "failed",
                         "order_id": "order_demo_card_001",
                         "method": "card",
                         "email": "rohan.mehta@outlook.com",
                         "contact": "+918765432109",
-                        "description": "Pro Plan — Monthly Subscription",
+                        "description": "Pro Plan - Monthly Subscription",
                         "error_code": "BAD_REQUEST_ERROR",
                         "error_description": "Your payment was declined by the bank. Please try a different payment method or contact your bank.",
                         "error_source": "bank",
@@ -115,14 +115,14 @@ SCENARIOS = {
                     "entity": {
                         "id": "pay_demo_nb_001",
                         "entity": "payment",
-                        "amount": 499900,       # ₹4,999 — annual plan
+                        "amount": 499900,       # ₹4,999 - annual plan
                         "currency": "INR",
                         "status": "failed",
                         "order_id": "order_demo_nb_001",
                         "method": "netbanking",
                         "email": "ananya.iyer@yahoo.com",
                         "contact": "+917654321098",
-                        "description": "Enterprise Plan — Annual",
+                        "description": "Enterprise Plan - Annual",
                         "error_code": "GATEWAY_ERROR",
                         "error_description": "Net banking session expired. Please retry with a fresh session.",
                         "error_source": "gateway",
@@ -153,7 +153,7 @@ SCENARIOS = {
                         "method": "upi",
                         "email": "test.nophone@gmail.com",
                         "contact": None,        # ← missing phone
-                        "description": "Test — No Phone",
+                        "description": "Test - No Phone",
                         "error_code": "BAD_REQUEST_ERROR",
                         "error_description": "UPI timeout",
                         "error_source": "customer",
@@ -184,7 +184,7 @@ SCENARIOS = {
                         "method": "card",
                         "email": None,          # ← missing email
                         "contact": "+919999999999",
-                        "description": "Test — No Email",
+                        "description": "Test - No Email",
                         "error_code": "BAD_REQUEST_ERROR",
                         "error_description": "Card declined",
                         "error_source": "bank",
@@ -226,7 +226,7 @@ def send_demo_webhook(
     print(f"Server   : {server_url}/webhook/payment-failed")
     print(f"{'='*60}")
 
-    # Serialize to compact JSON — no spaces — matching what Razorpay sends
+    # Serialize to compact JSON - no spaces - matching what Razorpay sends
     body: bytes = json.dumps(
         scenario["payload"], separators=(",", ":"), ensure_ascii=False
     ).encode("utf-8")
@@ -307,7 +307,7 @@ def main():
     if args.list:
         print("Available scenarios:")
         for name, s in SCENARIOS.items():
-            print(f"  {name:<20} — {s['description']}")
+            print(f"  {name:<20} - {s['description']}")
         return
 
     secret = os.getenv("RAZORPAY_WEBHOOK_SECRET")

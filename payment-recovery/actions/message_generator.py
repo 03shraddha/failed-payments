@@ -59,10 +59,10 @@ async def generate_recovery_messages(
 ) -> RecoveryMessages:
     """
     Calls OpenAI to generate personalised SMS + email content.
-    Returns a RecoveryMessages dataclass. Never raises — falls back gracefully.
+    Returns a RecoveryMessages dataclass. Never raises - falls back gracefully.
     """
     if not OPENAI_API_KEY:
-        logger.warning("OPENAI_API_KEY not set — using fallback messages")
+        logger.warning("OPENAI_API_KEY not set: using fallback messages")
         return _fallback(amount, reason, link)
 
     try:
@@ -87,7 +87,7 @@ Please write TWO recovery messages:
    Start with "EMAIL SUBJECT:" on its own line, then "EMAIL BODY:" on its own line.
    - Address the customer warmly
    - Mention the amount and failure reason briefly (don't make them feel bad)
-   - Encourage them to retry — the jewellery piece is waiting for them
+   - Encourage them to retry - the jewellery piece is waiting for them
    - Sign off warmly from {BUSINESS_NAME}
    - Include the retry link naturally in the body"""
 
@@ -105,7 +105,7 @@ Please write TWO recovery messages:
         return _parse_openai_response(raw, amount, reason, link)
 
     except Exception as exc:
-        logger.error("OpenAI message generation failed: %r — using fallback", exc)
+        logger.error("OpenAI message generation failed: %r - using fallback", exc)
         return _fallback(amount, reason, link)
 
 

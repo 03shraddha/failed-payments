@@ -1,4 +1,4 @@
-# Failed Payment Recovery — Task Tracker
+# Failed Payment Recovery - Task Tracker
 
 ## Status: In Progress
 

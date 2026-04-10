@@ -1,5 +1,5 @@
 """
-/demo  — browser-based simulation UI for the payment recovery system.
+/demo  : browser-based simulation UI for the payment recovery system.
 
 GET  /demo          → serves the HTML page
 POST /demo/simulate → runs a real simulation (SMS + email + Slack) and returns JSON
@@ -21,7 +21,7 @@ from config import GMAIL_FROM_ADDRESS
 router = APIRouter()
 
 # ---------------------------------------------------------------------------
-# Demo scenarios — each contains the customer/payment data used for simulation
+# Demo scenarios: each contains the customer/payment data used for simulation
 # ---------------------------------------------------------------------------
 SCENARIOS: dict = {
     "upi_timeout": {
@@ -84,7 +84,7 @@ async def simulate(req: SimulateRequest):
     reason = s["error"]
     method = s["method"]
 
-    # 1. Use the demo link directly — avoids hitting Razorpay with fake order IDs
+    # 1. Use the demo link directly: avoids hitting Razorpay with fake order IDs
     link = s["demo_link"]
 
     # 2. Ask OpenAI to craft personalised jewellery-shop recovery messages
@@ -156,7 +156,7 @@ HTML = """<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Failed Payment Recovery — Live Demo</title>
+<title>failed payment recovery · live demo</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -455,26 +455,69 @@ HTML = """<!DOCTYPE html>
     <span class="nav-brand">Razorpay</span>
   </div>
   <div class="nav-sep"></div>
-  <span class="nav-title">Payment Recovery</span>
+  <span class="nav-title">payment recovery</span>
   <div class="nav-live">
     <div class="nav-live-dot"></div>
-    Live Demo
+    live demo
   </div>
 </nav>
 
+<!-- Demo -->
+<section class="demo-section">
+  <div class="demo-inner">
+    <div class="section-label">try it live</div>
+    <div class="section-title" style="margin-bottom:6px;">see it fire in real time.</div>
+    <div class="section-body" style="margin-bottom:28px;">pick a scenario, enter a phone number, and watch SMS + email + Slack all trigger at once.</div>
+
+    <div class="card">
+      <div class="card-label">simulate a failed payment</div>
+      <div class="pills">
+        <button class="pill active" data-scenario="upi_timeout">📱 UPI timeout</button>
+        <button class="pill" data-scenario="card_decline">💳 card declined</button>
+        <button class="pill" data-scenario="netbanking_failure">🏦 net banking</button>
+      </div>
+      <div class="field">
+        <label>customer phone number</label>
+        <input type="tel" id="phoneInput" placeholder="+91 98765 43210">
+        <div class="hint">use a Twilio-verified number to actually receive the SMS. leave blank to use the demo number.</div>
+      </div>
+      <button class="btn" id="simulateBtn" onclick="runSimulation()">
+        <span class="spinner" id="spinner"></span>
+        <span id="btnText">simulate failed payment</span>
+      </button>
+      <div class="err-bar" id="errBar"></div>
+    </div>
+
+    <!-- Webhook log -->
+    <div class="wh-log" id="whLog">
+      <div class="wh-log-title">webhook payload · what Razorpay sends</div>
+      <div id="logLines"></div>
+    </div>
+
+    <!-- Results -->
+    <div class="card" id="results">
+      <div class="card-label">what just happened</div>
+      <div class="info-grid" id="infoGrid"></div>
+      <div id="aiMessage"></div>
+      <div class="action-list" id="actionList"></div>
+      <div id="linkRow"></div>
+    </div>
+  </div>
+</section>
+
 <!-- Hero -->
 <section class="hero">
-  <div class="hero-chip">⚡ Built on Razorpay Webhooks</div>
-  <h1>Your customer's payment<br>just failed. <em>Now what?</em></h1>
-  <p class="hero-desc">You do nothing. The system handles it — in under 2 seconds.</p>
-  <p class="hero-sub">The moment a payment fails, Razorpay pings this app. The customer gets an SMS, an email, and a fresh payment link. Your team gets a Slack alert. Zero manual work.</p>
+  <div class="hero-chip">⚡ built on Razorpay webhooks</div>
+  <h1>your customer's payment<br>just failed. <em>now what?</em></h1>
+  <p class="hero-desc">you do nothing. the system handles it, in under 2 seconds.</p>
+  <p class="hero-sub">the moment a payment fails, Razorpay pings this app. the customer gets an SMS, an email, and a fresh payment link. your team gets a Slack alert. zero manual work.</p>
 
   <!-- Webhook explainer -->
   <div class="webhook-callout">
     <div class="wh-icon">🔔</div>
     <div>
-      <div class="wh-title">Wait — what's a webhook?</div>
-      <div class="wh-body">Think of it like a doorbell. When a payment fails, Razorpay rings your app's doorbell with a <code>POST /webhook</code> call — with all the details. Your app answers and takes action instantly. No polling. No delays.</div>
+      <div class="wh-title">wait, what's a webhook?</div>
+      <div class="wh-body">think of it like a doorbell. when a payment fails, Razorpay rings your app's doorbell with a <code>POST /webhook</code> call, with all the details. your app answers and takes action instantly. no polling. no delays.</div>
     </div>
   </div>
 
@@ -482,22 +525,22 @@ HTML = """<!DOCTYPE html>
   <div class="flow">
     <div class="flow-node">
       <div class="flow-ball fb-red">💸</div>
-      <div class="flow-tag">Payment fails</div>
+      <div class="flow-tag">payment fails</div>
     </div>
     <div class="flow-arrow">→</div>
     <div class="flow-node">
       <div class="flow-ball fb-blue">🔔</div>
-      <div class="flow-tag">Webhook fires</div>
+      <div class="flow-tag">webhook fires</div>
     </div>
     <div class="flow-arrow">→</div>
     <div class="flow-node">
       <div class="flow-ball fb-green">🔗</div>
-      <div class="flow-tag">New link created</div>
+      <div class="flow-tag">new link created</div>
     </div>
     <div class="flow-arrow">→</div>
     <div class="flow-outs">
       <div class="flow-out-pill">📱 SMS to customer</div>
-      <div class="flow-out-pill">✉️ Email to customer</div>
+      <div class="flow-out-pill">✉️ email to customer</div>
       <div class="flow-out-pill">🔔 Slack alert for you</div>
     </div>
   </div>
@@ -518,77 +561,34 @@ HTML = """<!DOCTYPE html>
 <!-- Why section -->
 <section class="why-section">
   <div class="why-inner">
-    <div class="section-label">Why it matters</div>
-    <div class="section-title">Every failed payment is a<br>sale you're about to lose.</div>
-    <div class="section-body">Most businesses do nothing when a payment fails. The customer gets confused, gives up, and buys elsewhere. This system fights back — automatically.</div>
+    <div class="section-label">why it matters</div>
+    <div class="section-title">every failed payment is a<br>sale you're about to lose.</div>
+    <div class="section-body">most businesses do nothing when a payment fails. the customer gets confused, gives up, and buys elsewhere. this system fights back, automatically.</div>
     <div class="why-grid">
       <div class="why-card">
         <span class="why-emoji">😤</span>
-        <div class="why-title">They didn't change their mind</div>
-        <div class="why-desc">A UPI timeout or card decline doesn't mean the customer left. Something just broke. A quick SMS with a fresh link brings them back before they forget.</div>
-        <span class="why-tag">📱 SMS in under 5 seconds</span>
+        <div class="why-title">they didn't change their mind</div>
+        <div class="why-desc">a UPI timeout or card decline doesn't mean the customer left. something just broke. a quick SMS with a fresh link brings them back before they forget.</div>
+        <span class="why-tag">📱 sms in under 5 seconds</span>
       </div>
       <div class="why-card">
         <span class="why-emoji">💌</span>
-        <div class="why-title">Email keeps it professional</div>
-        <div class="why-desc">A clean email explains what happened in plain English — no confusing bank codes — with a big "Retry Payment" button. Simple. Friendly. Effective.</div>
-        <span class="why-tag">✉️ Sent instantly</span>
+        <div class="why-title">email keeps it professional</div>
+        <div class="why-desc">a clean email explains what happened in plain english, no confusing bank codes, with a big "retry payment" button. simple. friendly. effective.</div>
+        <span class="why-tag">✉️ sent instantly</span>
       </div>
       <div class="why-card">
         <span class="why-emoji">🔗</span>
-        <div class="why-title">No "go back to checkout"</div>
-        <div class="why-desc">This generates a fresh Razorpay payment link valid for 24 hours. Customer clicks, pays. No friction, no starting over from scratch.</div>
-        <span class="why-tag">🔗 Link valid 24 hours</span>
+        <div class="why-title">no "go back to checkout"</div>
+        <div class="why-desc">this generates a fresh Razorpay payment link valid for 24 hours. customer clicks, pays. no friction, no starting over from scratch.</div>
+        <span class="why-tag">🔗 link valid 24 hours</span>
       </div>
       <div class="why-card">
         <span class="why-emoji">🔔</span>
-        <div class="why-title">Your team sees it — and knows what to do</div>
-        <div class="why-desc">Every failure posts to Slack with the amount, payment method, and reason. If the customer still doesn't pay after the SMS + email, your ops team can personally follow up, issue a refund, or flag a repeat failure pattern — before it becomes a complaint.</div>
+        <div class="why-title">your team sees it, and knows what to do</div>
+        <div class="why-desc">every failure posts to Slack with the amount, payment method, and reason. if the customer still doesn't pay after the SMS + email, your ops team can personally follow up, issue a refund, or flag a repeat failure pattern, before it becomes a complaint.</div>
         <span class="why-tag">🔔 #payment-ops alert</span>
       </div>
-    </div>
-  </div>
-</section>
-
-<!-- Demo -->
-<section class="demo-section">
-  <div class="demo-inner">
-    <div class="section-label">Try it live</div>
-    <div class="section-title" style="margin-bottom:6px;">See it fire in real time.</div>
-    <div class="section-body" style="margin-bottom:28px;">Pick a scenario, enter a phone number, and watch SMS + email + Slack all trigger at once.</div>
-
-    <div class="card">
-      <div class="card-label">Simulate a failed payment</div>
-      <div class="pills">
-        <button class="pill active" data-scenario="upi_timeout">📱 UPI Timeout</button>
-        <button class="pill" data-scenario="card_decline">💳 Card Declined</button>
-        <button class="pill" data-scenario="netbanking_failure">🏦 Net Banking</button>
-      </div>
-      <div class="field">
-        <label>Customer Phone Number</label>
-        <input type="tel" id="phoneInput" placeholder="+91 98765 43210">
-        <div class="hint">Use a Twilio-verified number to actually receive the SMS. Leave blank to use the demo number.</div>
-      </div>
-      <button class="btn" id="simulateBtn" onclick="runSimulation()">
-        <span class="spinner" id="spinner"></span>
-        <span id="btnText">Simulate Failed Payment</span>
-      </button>
-      <div class="err-bar" id="errBar"></div>
-    </div>
-
-    <!-- Webhook log -->
-    <div class="wh-log" id="whLog">
-      <div class="wh-log-title">Webhook payload — what Razorpay sends</div>
-      <div id="logLines"></div>
-    </div>
-
-    <!-- Results -->
-    <div class="card" id="results">
-      <div class="card-label">What just happened</div>
-      <div class="info-grid" id="infoGrid"></div>
-      <div id="aiMessage"></div>
-      <div class="action-list" id="actionList"></div>
-      <div id="linkRow"></div>
     </div>
   </div>
 </section>
@@ -596,8 +596,8 @@ HTML = """<!DOCTYPE html>
 <script>
   let sel = 'upi_timeout';
   const sd = {
-    upi_timeout:        { amount: 'Rs. 2,499', method: 'UPI',         err: 'UPI timed out — customer did not complete the payment' },
-    card_decline:       { amount: 'Rs. 999',   method: 'Credit Card', err: 'Card declined by bank — insufficient funds' },
+    upi_timeout:        { amount: 'Rs. 2,499', method: 'UPI',         err: 'UPI timed out, customer did not complete the payment' },
+    card_decline:       { amount: 'Rs. 999',   method: 'Credit Card', err: 'Card declined by bank, insufficient funds' },
     netbanking_failure: { amount: 'Rs. 4,999', method: 'Net Banking', err: 'Net banking session expired mid-payment' },
   };
 
@@ -613,7 +613,7 @@ HTML = """<!DOCTYPE html>
     const bt  = document.getElementById('btnText');
     const err = document.getElementById('errBar');
 
-    btn.disabled = true; sp.style.display = 'block'; bt.textContent = 'Sending...';
+    btn.disabled = true; sp.style.display = 'block'; bt.textContent = 'sending...';
     err.style.display = 'none';
     document.getElementById('results').classList.remove('show');
     document.getElementById('whLog').classList.remove('show');
@@ -643,17 +643,17 @@ HTML = """<!DOCTYPE html>
       err.textContent = 'Error: ' + e.message;
       err.style.display = 'block';
     } finally {
-      btn.disabled = false; sp.style.display = 'none'; bt.textContent = 'Simulate Failed Payment';
+      btn.disabled = false; sp.style.display = 'none'; bt.textContent = 'simulate failed payment';
     }
   }
 
   function render(d) {
-    const ml = { upi:'UPI', card:'Credit / Debit Card', netbanking:'Net Banking' };
+    const ml = { upi:'UPI', card:'credit / debit card', netbanking:'net banking' };
     document.getElementById('infoGrid').innerHTML = `
       <div class="info-cell"><div class="ic-label">Amount</div><div class="ic-value">Rs. ${d.amount.toFixed(2)}</div></div>
       <div class="info-cell"><div class="ic-label">Method</div><div class="ic-value">${ml[d.method]||d.method}</div></div>
-      <div class="info-cell"><div class="ic-label">Customer Phone</div><div class="ic-value">${d.customer_phone||'—'}</div></div>
-      <div class="info-cell"><div class="ic-label">Customer Email</div><div class="ic-value">${d.customer_email||'—'}</div></div>
+      <div class="info-cell"><div class="ic-label">Customer Phone</div><div class="ic-value">${d.customer_phone||'n/a'}</div></div>
+      <div class="info-cell"><div class="ic-label">Customer Email</div><div class="ic-value">${d.customer_email||'n/a'}</div></div>
       <div class="info-cell full"><div class="ic-label">Why it failed</div><div class="ic-value" style="font-weight:400;font-size:13px;color:#6B7280;">${d.reason}</div></div>
     `;
 
@@ -663,28 +663,28 @@ HTML = """<!DOCTYPE html>
       document.getElementById('aiMessage').innerHTML = `
         <div style="background:#F0F7FF;border:1px solid #BFDBFE;border-radius:12px;padding:16px 20px;margin-bottom:16px;">
           <div style="font-size:11px;font-weight:700;color:#0D94FB;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:10px;">
-            ✦ OpenAI-generated recovery message
+            ✦ openai-generated recovery message
           </div>
           <div style="font-size:13px;color:#1E3A5F;line-height:1.6;margin-bottom:8px;">
-            <span style="font-weight:600;">SMS:</span> ${ai.sms}
+            <span style="font-weight:600;">sms:</span> ${ai.sms}
           </div>
           <div style="font-size:13px;color:#1E3A5F;line-height:1.6;">
-            <span style="font-weight:600;">Email subject:</span> ${ai.email_subject}
+            <span style="font-weight:600;">email subject:</span> ${ai.email_subject}
           </div>
         </div>`;
     }
 
     const am = {
-      sms:   { icon:'📱', name:'SMS to customer',   what:'Sent AI-crafted text with retry link',      detail: d.customer_phone },
-      email: { icon:'✉️',  name:'Email to customer', what:'Sent AI-crafted recovery email',            detail: d.customer_email },
-      slack: { icon:'🔔', name:'Slack alert',        what:'Posted to #payment-ops with full details',  detail: '#payment-ops' },
+      sms:   { icon:'📱', name:'SMS to customer',   what:'sent AI-crafted text with retry link',      detail: d.customer_phone },
+      email: { icon:'✉️',  name:'email to customer', what:'sent AI-crafted recovery email',            detail: d.customer_email },
+      slack: { icon:'🔔', name:'Slack alert',        what:'posted to #payment-ops with full details',  detail: '#payment-ops' },
     };
     // Filter out ai_message — it's metadata, not an action
     document.getElementById('actionList').innerHTML = Object.entries(d.actions)
       .filter(([k]) => k !== 'ai_message')
       .map(([k, r]) => {
       const m = am[k] || { icon:'?', name:k, what:'', detail:'' };
-      const label = r.status === 'sent' ? 'Sent' : r.status === 'failed' ? 'Failed' : 'Skipped';
+      const label = r.status === 'sent' ? 'sent' : r.status === 'failed' ? 'failed' : 'skipped';
       const bc    = r.status === 'sent' ? 'b-sent' : r.status === 'failed' ? 'b-failed' : 'b-skipped';
       const det   = r.status === 'failed' ? r.detail : m.detail || '';
       return `<div class="action-row">
@@ -702,10 +702,10 @@ HTML = """<!DOCTYPE html>
       <div class="link-row">
         <div class="lr-icon">🔗</div>
         <div class="lr-body">
-          <div class="lr-label">Recovery link sent to customer</div>
+          <div class="lr-label">recovery link sent to customer</div>
           <div class="lr-url">${d.recovery_link}</div>
         </div>
-        <button class="copy-btn" onclick="doCopy('${d.recovery_link}',event)">Copy</button>
+        <button class="copy-btn" onclick="doCopy('${d.recovery_link}',event)">copy</button>
       </div>`;
 
     document.getElementById('results').classList.add('show');
@@ -714,8 +714,8 @@ HTML = """<!DOCTYPE html>
 
   function doCopy(url, e) {
     navigator.clipboard.writeText(url).then(() => {
-      e.target.textContent = 'Copied!';
-      setTimeout(() => e.target.textContent = 'Copy', 1500);
+      e.target.textContent = 'copied!';
+      setTimeout(() => e.target.textContent = 'copy', 1500);
     });
   }
 </script>

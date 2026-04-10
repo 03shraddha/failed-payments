@@ -18,7 +18,7 @@ async def create_payment_link(
     Creates a fresh Razorpay payment link for a failed order.
 
     Returns the short_url on success.
-    Falls back to https://rzp.io/i/{order_id} on any failure — so downstream
+    Falls back to https://rzp.io/i/{order_id} on any failure - so downstream
     actions always have a valid link to include.
 
     Timeout is 8s to stay within the 10s total webhook SLA.
@@ -29,11 +29,11 @@ async def create_payment_link(
         "amount": amount_paise,          # Razorpay always works in paise
         "currency": "INR",
         "description": description,
-        # Unix timestamp — must be at least 15 minutes in the future
+        # Unix timestamp: must be at least 15 minutes in the future
         "expire_by": int(time.time()) + 86400,   # 24 hours from now
         "reference_id": order_id,
         "notify": {
-            # Don't double-notify via Razorpay — we handle comms ourselves
+            # Don't double-notify via Razorpay: we handle comms ourselves
             "sms": False,
             "email": False,
         },
@@ -68,7 +68,7 @@ async def create_payment_link(
 
     except Exception as exc:
         logger.error(
-            "Failed to create payment link for order %s: %s — using fallback",
+            "Failed to create payment link for order %s: %s - using fallback",
             order_id,
             exc,
         )

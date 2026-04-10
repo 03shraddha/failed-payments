@@ -28,5 +28,5 @@ SLACK_CHANNEL   = os.environ["SLACK_CHANNEL"]
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 
 # --- Business ---
-# Optional — falls back to a generic name if not set
+# Optional: falls back to a generic name if not set
 BUSINESS_NAME = os.getenv("BUSINESS_NAME", "Our Store")

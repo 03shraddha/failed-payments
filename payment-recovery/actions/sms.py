@@ -14,10 +14,10 @@ from config import (
 
 logger = logging.getLogger(__name__)
 
-# Module-level singleton — avoids re-creating the client on every webhook
+# Module-level singleton: avoids re-creating the client on every webhook
 _client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 
-# Twilio terminal statuses — anything in FAILED means delivery won't happen
+# Twilio terminal statuses: anything in FAILED means delivery won't happen
 _DELIVERED = {"delivered"}
 _FAILED    = {"failed", "undelivered"}
 _TERMINAL  = _DELIVERED | _FAILED | {"canceled"}
@@ -40,7 +40,7 @@ def _normalize_phone(phone: str) -> str:
         return "+" + phone
     if len(phone) == 10 and phone.isdigit():
         return "+91" + phone
-    return phone  # unknown format — pass through
+    return phone  # unknown format - pass through
 
 
 def _build_message(amount: float, reason: str, link: str) -> str:
@@ -77,11 +77,11 @@ def _poll_status(sid: str, max_wait: int = 8) -> str:
         if status in _TERMINAL:
             return status
         time.sleep(1)
-    return "unknown"  # timed out waiting — not necessarily failed
+    return "unknown"  # timed out waiting - not necessarily failed
 
 
 def _send_sms_sync(phone: str, amount: float, reason: str, link: str, custom_text: str | None = None) -> None:
-    """Synchronous Twilio call — run via asyncio.to_thread to avoid blocking the event loop."""
+    """Synchronous Twilio call: run via asyncio.to_thread to avoid blocking the event loop."""
     normalized = _normalize_phone(phone)
     body = custom_text if custom_text else _build_message(amount, reason, link)
 
@@ -102,7 +102,7 @@ def _send_sms_sync(phone: str, amount: float, reason: str, link: str, custom_tex
 
     logger.info("SMS accepted: SID=%s to=%s chars=%d", message.sid, normalized, len(body))
 
-    # Poll for actual delivery — surfaces silent failures (DND, carrier blocks)
+    # Poll for actual delivery: surfaces silent failures (DND, carrier blocks)
     final_status = _poll_status(message.sid)
 
     if final_status in _FAILED:

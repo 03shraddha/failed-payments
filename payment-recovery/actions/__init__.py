@@ -1,1 +1,1 @@
-# actions package — SMS, Email, Slack notification handlers
+# actions package: SMS, Email, Slack notification handlers

@@ -35,7 +35,7 @@ async def payment_failed_webhook(
     # ── 1. Read raw bytes FIRST ──────────────────────────────────────────────
     # Must happen before any JSON parsing. FastAPI caches the bytes on the
     # request object so we can re-read them later, but we need them now for
-    # HMAC verification. Never verify against re-serialized JSON — byte order
+    # HMAC verification. Never verify against re-serialized JSON - byte order
     # and whitespace must match exactly what Razorpay signed.
     raw_body: bytes = await request.body()
 
@@ -68,7 +68,7 @@ async def payment_failed_webhook(
     method: str       = entity.get("method", "unknown")
 
     # error_description is a plain string in most Razorpay versions,
-    # but can be a nested dict in some edge cases — handle both.
+    # but can be a nested dict in some edge cases - handle both.
     raw_err = entity.get("error_description", "Payment failed")
     if isinstance(raw_err, dict):
         reason: str = raw_err.get("description", "Payment failed")

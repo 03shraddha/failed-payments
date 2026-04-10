@@ -46,7 +46,7 @@ def _post_slack_sync(
     sms_sent: bool,
     email_sent: bool,
 ) -> None:
-    """Synchronous Slack post — run via asyncio.to_thread."""
+    """Synchronous Slack post: run via asyncio.to_thread."""
     sms_status   = "SMS ✓"  if sms_sent   else "SMS ✗"
     email_status = "Email ✓" if email_sent else "Email ✗"
 

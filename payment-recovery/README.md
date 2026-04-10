@@ -1,6 +1,6 @@
 # Failed Payment Recovery
 
-Automatically recovers failed Razorpay payments by sending SMS, email, and Slack alerts with a fresh payment link — all triggered via webhook.
+Automatically recovers failed Razorpay payments by sending SMS, email, and Slack alerts with a fresh payment link, all triggered via webhook.
 
 ## What It Does
 
@@ -80,7 +80,7 @@ OPENAI_API_KEY=sk-...
 #### Razorpay
 1. Log in to [dashboard.razorpay.com](https://dashboard.razorpay.com)
 2. **API Keys** → Generate a key pair → copy `Key ID` and `Key Secret`
-3. **Webhooks** → Add webhook → set URL to `https://your-domain/webhook/payment-failed`, select the `payment.failed` event, and set a **Secret** — this becomes `RAZORPAY_WEBHOOK_SECRET`
+3. **Webhooks** → Add webhook → set URL to `https://your-domain/webhook/payment-failed`, select the `payment.failed` event, and set a **Secret** - this becomes `RAZORPAY_WEBHOOK_SECRET`
 
 #### Twilio (SMS)
 1. Sign up at [twilio.com](https://www.twilio.com)
@@ -122,7 +122,7 @@ Then set the ngrok HTTPS URL as your Razorpay webhook URL.
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `GET`  | `/health` | Health check — returns `{"status": "ok"}` |
+| `GET`  | `/health` | Health check: returns `{"status": "ok"}` |
 | `POST` | `/webhook/payment-failed` | Razorpay webhook receiver |
 | `GET`  | `/demo` | Browser-based simulation UI |
 | `POST` | `/demo/simulate` | Runs a real simulation (SMS + Email + Slack) |
@@ -153,7 +153,7 @@ payment-recovery/
 ├── demo/
 │   ├── send_webhook.py   # CLI script to simulate a webhook locally
 │   └── test_signature.py # Verify HMAC signing works
-├── .env.example          # Template — copy to .env and fill in
+├── .env.example          # Template: copy to .env and fill in
 ├── .gitignore            # .env and logs are excluded
 └── requirements.txt      # All dependencies
 ```
@@ -162,10 +162,10 @@ payment-recovery/
 
 ## Tech Stack
 
-- **FastAPI** — web framework
-- **Razorpay** — payment gateway & webhooks
-- **Twilio** — SMS notifications
-- **Gmail SMTP** — email notifications
-- **Slack SDK** — Slack alerts
-- **OpenAI GPT-4o-mini** — AI-personalised recovery messages (optional)
-- **Anthropic Claude + MCP** — alternative MCP-based Slack dispatch (optional)
+- **FastAPI**: web framework
+- **Razorpay**: payment gateway & webhooks
+- **Twilio**: SMS notifications
+- **Gmail SMTP**: email notifications
+- **Slack SDK**: Slack alerts
+- **OpenAI GPT-4o-mini**: AI-personalised recovery messages (optional)
+- **Anthropic Claude + MCP**: alternative MCP-based Slack dispatch (optional)

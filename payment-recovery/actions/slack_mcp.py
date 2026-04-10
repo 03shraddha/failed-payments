@@ -1,11 +1,11 @@
 """
-slack_mcp.py — MCP-based Slack alerting (demo).
+slack_mcp.py: MCP-based Slack alerting (demo).
 
 Instead of calling the Slack SDK directly, this module:
   1. Spawns the official @modelcontextprotocol/server-slack as a local subprocess.
   2. Connects to it over stdio using the MCP Python SDK.
   3. Calls the Anthropic Claude API, giving it the MCP tools as available tools.
-  4. Claude decides to call slack_post_message via the MCP tool — we execute that
+  4. Claude decides to call slack_post_message via the MCP tool - we execute that
      tool call against the live MCP server and return the result.
 
 This is the "consuming an MCP" demo: the AI agent posts to Slack via tool use
@@ -16,9 +16,9 @@ Requirements (add to requirements.txt):
     anthropic>=0.84.0   # 0.84+ ships native MCP helpers
 
 Environment variables needed (already in .env):
-    SLACK_BOT_TOKEN   — xoxb-... bot token
-    SLACK_CHANNEL     — e.g. #payment-ops
-    ANTHROPIC_API_KEY — your Claude API key
+    SLACK_BOT_TOKEN   : xoxb-... bot token
+    SLACK_CHANNEL     : e.g. #payment-ops
+    ANTHROPIC_API_KEY : your Claude API key
 """
 
 import asyncio
@@ -206,7 +206,7 @@ async def post_slack(
     email_sent: bool = True,
 ) -> None:
     """
-    Async entry point — same signature as the original post_slack() so it can
+    Async entry point: same signature as the original post_slack() so it can
     be swapped in without touching main.py.
 
     Flow:

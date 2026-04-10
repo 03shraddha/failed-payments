@@ -44,7 +44,7 @@ body_dict = {
     },
 }
 
-# Compact JSON — whitespace matters for signature verification
+# Compact JSON: whitespace matters for signature verification
 body_str = json.dumps(body_dict, separators=(",", ":"), ensure_ascii=False)
 body_bytes = body_str.encode("utf-8")
 

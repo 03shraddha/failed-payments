@@ -34,7 +34,7 @@ source "$APP_DIR/venv/Scripts/activate"
 
 # ── Step 3: Start server in background ───────────────────────────────────────
 cd "$APP_DIR"
-uvicorn main:app --port $PORT --log-level warning > server.log 2>&1 &
+uvicorn main:app --port $PORT --log-level info > server.log 2>&1 &
 SERVER_PID=$!
 echo "   Server starting (PID $SERVER_PID)..."
 
@@ -58,6 +58,13 @@ echo ""
 echo "✓  Demo is live at $URL"
 echo "   Press Ctrl+C to stop the server."
 echo ""
+echo "── SMS delivery monitor ─────────────────────────────────────────────────────"
+echo "   Watching for SMS events... (trigger a webhook to see status)"
+echo "   Note: Indian numbers may not receive SMS due to DND registry or Twilio"
+echo "         trial account restrictions (error 21608 = number not verified)."
+echo "─────────────────────────────────────────────────────────────────────────────"
+echo ""
 
-# Keep script alive so Ctrl+C kills the server cleanly
-wait $SERVER_PID
+# Tail server.log and surface only SMS/webhook-relevant lines so the terminal
+# shows a clear sent/failed status after each demo trigger.
+tail -f server.log | grep --line-buffered -E "SMS|Twilio|twilio|sms|webhook|payment_link|ERROR|WARNING|status"

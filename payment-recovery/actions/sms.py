@@ -61,7 +61,7 @@ def _build_message(amount: float, reason: str, link: str) -> str:
     return template.format(amount=amount, reason=truncated, link=link, biz=BUSINESS_NAME)
 
 
-def _poll_status(sid: str, max_wait: int = 8) -> str:
+def _poll_status(sid: str, max_wait: int = 30) -> str:
     """
     Polls Twilio for the message status until it reaches a terminal state
     or max_wait seconds elapse. Returns the final status string.

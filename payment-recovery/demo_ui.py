@@ -759,7 +759,7 @@ HTML = """<!DOCTYPE html>
       const bc    = r.status === 'sent' ? 'b-sent' : r.status === 'failed' ? 'b-failed' : 'b-skipped';
       const det   = r.status === 'failed' ? r.detail : m.detail || '';
       const smsNote = (k === 'sms' && r.status === 'sent')
-        ? `<div class="ar-note">⚠️ Indian carriers (TRAI/DND) may silently block SMS from US numbers — Twilio shows "Delivered" but handset delivery isn't guaranteed.</div>`
+        ? `<div class="ar-note">⚠️ Indian carriers (TRAI/DND) may silently block SMS from US numbers. Twilio shows "Delivered" but handset delivery is not guaranteed.</div>`
         : '';
       return `<div class="action-row">
         <div class="ar-icon">${m.icon}</div>

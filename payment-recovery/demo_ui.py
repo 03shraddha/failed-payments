@@ -6,8 +6,12 @@ POST /demo/simulate → runs a real simulation (SMS + email + Slack) and returns
 """
 
 import asyncio
+import base64
 import copy
+import io
 from typing import Optional
+
+import qrcode
 
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
@@ -18,7 +22,16 @@ from actions.message_generator import generate_recovery_messages
 from actions.slack import post_slack
 from actions.sms import send_sms
 from config import GMAIL_FROM_ADDRESS
+
 router = APIRouter()
+
+
+def generate_qr_base64(url: str) -> str:
+    """Generate a QR code from *url* and return it as a base64-encoded PNG string."""
+    img = qrcode.make(url)
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    return base64.b64encode(buf.getvalue()).decode()
 
 # ---------------------------------------------------------------------------
 # Demo scenarios: each contains the customer/payment data used for simulation
@@ -151,6 +164,7 @@ async def simulate(req: SimulateRequest):
         "customer_email": email,
         "reason":     reason,
         "recovery_link": link,
+        "qr_code_b64": generate_qr_base64(link),
         "actions":    action_results,
     }
 
@@ -457,6 +471,12 @@ HTML = """<!DOCTYPE html>
   .lr-body { flex: 1; min-width: 0; }
   .lr-label { font-size: 11px; font-weight: 700; color: #0369A1; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
   .lr-url { font-size: 13px; color: #0D94FB; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .qr-block {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    flex-shrink: 0;
+  }
+  .qr-block img { width: 96px; height: 96px; border-radius: 8px; border: 1px solid #BAE6FD; }
+  .qr-block span { font-size: 10px; font-weight: 700; color: #0369A1; text-transform: uppercase; letter-spacing: 0.05em; }
   .copy-btn {
     background: #0D94FB; color: #fff; border: none;
     border-radius: 8px; padding: 8px 16px;
@@ -744,6 +764,12 @@ HTML = """<!DOCTYPE html>
       </div>`;
     }).join('');
 
+    const qrHtml = d.qr_code_b64
+      ? `<div class="qr-block">
+           <img src="data:image/png;base64,${d.qr_code_b64}" alt="QR code for payment link" />
+           <span>scan to pay</span>
+         </div>`
+      : '';
     document.getElementById('linkRow').innerHTML = `
       <div class="link-row">
         <div class="lr-icon">🔗</div>
@@ -752,6 +778,7 @@ HTML = """<!DOCTYPE html>
           <div class="lr-url">${d.recovery_link}</div>
         </div>
         <button class="copy-btn" onclick="doCopy('${d.recovery_link}',event)">copy</button>
+        ${qrHtml}
       </div>`;
 
     document.getElementById('results').classList.add('show');

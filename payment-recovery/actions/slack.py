@@ -34,6 +34,37 @@ def _mask_email(email: str | None) -> str:
     return f"{local[0]}***@{domain}"
 
 
+def _win_back_text(method: str, sms_sent: bool, email_sent: bool) -> str:
+    """Returns method-specific recovery suggestions as a Slack mrkdwn string."""
+    channels = []
+    if sms_sent:
+        channels.append("SMS")
+    if email_sent:
+        channels.append("Email")
+    delivery = " and ".join(channels) + " ✓" if channels else "no channels"
+
+    suggestions = {
+        "upi": [
+            "Offer a 10% discount on retry",
+            f"Recovery link sent via {delivery}",
+            "Follow up in 2 hrs if link unopened",
+        ],
+        "card": [
+            "Offer a 10% discount and suggest retrying with a different card",
+            f"Recovery link sent via {delivery}",
+            "Follow up in 2 hrs if link unopened",
+        ],
+        "netbanking": [
+            "Suggest switching to UPI or card for faster checkout",
+            f"Recovery link sent via {delivery}",
+            "Follow up in 2 hrs if link unopened",
+        ],
+    }
+    bullets = suggestions.get(method.lower(), suggestions["upi"])
+    lines = "\n".join(f"• {b}" for b in bullets)
+    return f"*Win them back:*\n{lines}"
+
+
 def _post_slack_sync(
     payment_id: str,
     order_id: str,
@@ -47,8 +78,8 @@ def _post_slack_sync(
     email_sent: bool,
 ) -> None:
     """Synchronous Slack post: run via asyncio.to_thread."""
-    sms_status   = "SMS ✓"  if sms_sent   else "SMS ✗"
-    email_status = "Email ✓" if email_sent else "Email ✗"
+    # Strip any em dashes from the reason before displaying
+    clean_reason = reason.replace("\u2014", ",").replace(" - ", ", ").strip()
 
     blocks = [
         {
@@ -69,16 +100,11 @@ def _post_slack_sync(
         {"type": "divider"},
         {
             "type": "section",
-            "text": {"type": "mrkdwn", "text": f"*Reason:* {reason}"},
+            "text": {"type": "mrkdwn", "text": f"*Reason:* {clean_reason}"},
         },
         {
-            "type": "context",
-            "elements": [
-                {
-                    "type": "mrkdwn",
-                    "text": f"Actions taken: {sms_status}  |  {email_status}",
-                }
-            ],
+            "type": "section",
+            "text": {"type": "mrkdwn", "text": _win_back_text(method, sms_sent, email_sent)},
         },
         {
             "type": "actions",

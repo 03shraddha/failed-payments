@@ -5,6 +5,7 @@ httpx==0.27.0
 twilio==9.0.5
 slack_sdk==3.27.1
 python-multipart==0.0.9
+qrcode[pil]>=7.4
 
 # AI message generation (optional — falls back to templates if key not set)
 openai>=1.0.0

@@ -82,36 +82,47 @@ def _post_slack_sync(
     clean_reason = reason.replace("\u2014", ",").replace(" - ", ", ").strip()
 
     blocks = [
+        # Source attribution: looks like an internal ops bot post
+        {
+            "type": "context",
+            "elements": [
+                {
+                    "type": "mrkdwn",
+                    "text": "🏪 *Merchant Ops* · #payment-ops · automated alert",
+                }
+            ],
+        },
         {
             "type": "header",
-            "text": {"type": "plain_text", "text": "🔴 Payment Failed", "emoji": True},
+            "text": {"type": "plain_text", "text": "🔴 Failed Payment: Action Required", "emoji": True},
         },
         {
             "type": "section",
             "fields": [
                 {"type": "mrkdwn", "text": f"*Amount:*\n₹{amount:.2f}"},
                 {"type": "mrkdwn", "text": f"*Method:*\n{method.upper()}"},
-                {"type": "mrkdwn", "text": f"*Pay ID:*\n`{payment_id}`"},
+                {"type": "mrkdwn", "text": f"*Payment ID:*\n`{payment_id}`"},
                 {"type": "mrkdwn", "text": f"*Order ID:*\n`{order_id}`"},
-                {"type": "mrkdwn", "text": f"*Phone:*\n{_mask_phone(phone)}"},
-                {"type": "mrkdwn", "text": f"*Email:*\n{_mask_email(email)}"},
+                {"type": "mrkdwn", "text": f"*Customer Phone:*\n{_mask_phone(phone)}"},
+                {"type": "mrkdwn", "text": f"*Customer Email:*\n{_mask_email(email)}"},
             ],
         },
         {"type": "divider"},
         {
             "type": "section",
-            "text": {"type": "mrkdwn", "text": f"*Reason:* {clean_reason}"},
+            "text": {"type": "mrkdwn", "text": f"*Failure Reason:* {clean_reason}"},
         },
         {
             "type": "section",
             "text": {"type": "mrkdwn", "text": _win_back_text(method, sms_sent, email_sent)},
         },
+        {"type": "divider"},
         {
             "type": "actions",
             "elements": [
                 {
                     "type": "button",
-                    "text": {"type": "plain_text", "text": "Open Recovery Link", "emoji": True},
+                    "text": {"type": "plain_text", "text": "📨 Open Recovery Link", "emoji": True},
                     "url": link,
                     "style": "primary",
                 }
@@ -123,7 +134,7 @@ def _post_slack_sync(
         _client.chat_postMessage(
             channel=SLACK_CHANNEL,
             # Fallback text shown in mobile push notifications and screen readers
-            text=f"Payment failed ₹{amount:.2f} via {method} — {reason}",
+            text=f"Payment failed ₹{amount:.2f} via {method}: {reason}",
             blocks=blocks,
         )
         logger.info("Slack alert posted for payment_id=%s", payment_id)

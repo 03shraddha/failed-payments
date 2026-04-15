@@ -461,6 +461,7 @@ HTML = """<!DOCTYPE html>
   .ar-name { font-size: 16px; font-weight: 700; color: #012652; }
   .ar-what { font-size: 13px; color: #6B7280; margin-top: 2px; }
   .ar-detail { font-size: 12px; color: #9CA3AF; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ar-note { font-size: 11px; color: #92400E; background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 6px; padding: 4px 8px; margin-top: 6px; line-height: 1.4; }
   .badge { font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 100px; flex-shrink: 0; }
   .b-sent    { background: #F0FDF4; color: #15803D; }
   .b-failed  { background: #FFF1F2; color: #BE123C; }
@@ -757,12 +758,16 @@ HTML = """<!DOCTYPE html>
       const label = r.status === 'sent' ? 'sent' : r.status === 'failed' ? 'failed' : 'skipped';
       const bc    = r.status === 'sent' ? 'b-sent' : r.status === 'failed' ? 'b-failed' : 'b-skipped';
       const det   = r.status === 'failed' ? r.detail : m.detail || '';
+      const smsNote = (k === 'sms' && r.status === 'sent')
+        ? `<div class="ar-note">⚠️ Indian carriers (TRAI/DND) may silently block SMS from US numbers — Twilio shows "Delivered" but handset delivery isn't guaranteed.</div>`
+        : '';
       return `<div class="action-row">
         <div class="ar-icon">${m.icon}</div>
         <div class="ar-body">
           <div class="ar-name">${m.name}</div>
           <div class="ar-what">${m.what}</div>
           ${det ? `<div class="ar-detail">${det}</div>` : ''}
+          ${smsNote}
         </div>
         <div class="badge ${bc}">${label}</div>
       </div>`;

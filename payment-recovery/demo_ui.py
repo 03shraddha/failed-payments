@@ -46,6 +46,7 @@ SCENARIOS: dict = {
         "contact": "+919876543210",
         "order_id": "order_demo_upi_001",
         "payment_id": "pay_demo_upi_001",
+        "product": "Dainty Rose Gold Layered Necklace",
         "error": "Payment was not completed due to a UPI timeout. The transaction was not processed.",
         "demo_link": "https://rzp.io/l/Kj7mPqR2",
     },
@@ -58,6 +59,7 @@ SCENARIOS: dict = {
         "contact": "+918765432109",
         "order_id": "order_demo_card_001",
         "payment_id": "pay_demo_card_001",
+        "product": "Minimal Silver Huggie Earrings",
         "error": "Your payment was declined by the bank. Please try a different payment method or contact your bank.",
         "demo_link": "https://rzp.io/l/Hn4xWsT8",
     },
@@ -70,6 +72,7 @@ SCENARIOS: dict = {
         "contact": "+917654321098",
         "order_id": "order_demo_nb_001",
         "payment_id": "pay_demo_nb_001",
+        "product": "Gold Waterproof Stackable Rings Set",
         "error": "Net banking session expired. Please retry with a fresh session.",
         "demo_link": "https://rzp.io/l/Bv9cLmY5",
     },
@@ -113,6 +116,7 @@ async def simulate(req: SimulateRequest):
         reason=reason,
         link=link,
         method=method,
+        product=s.get("product", ""),
     )
 
     # 3. Run SMS and email in parallel, capture individual results
@@ -745,7 +749,7 @@ HTML = """<!DOCTYPE html>
       email: { icon:'✉️',  name:'email to customer', what:'sent AI-crafted recovery email',            detail: d.customer_email },
       slack: { icon:'🔔', name:'slack alert',        what:'posted to #payment-ops with full details',  detail: '#payment-ops' },
     };
-    // Filter out ai_message — it's metadata, not an action
+    // Filter out ai_message: it's metadata, not an action
     document.getElementById('actionList').innerHTML = Object.entries(d.actions)
       .filter(([k]) => k !== 'ai_message')
       .map(([k, r]) => {
@@ -806,7 +810,7 @@ async def demo_page():
 
 @router.get("/demo/checkout", response_class=HTMLResponse)
 async def checkout_page(qr: str = "", amount: str = "", label: str = ""):
-    """Shows a clean QR code page — no contact form, just scan and pay."""
+    """Shows a clean QR code page. No contact form, just scan and pay."""
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>

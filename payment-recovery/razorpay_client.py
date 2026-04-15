@@ -13,7 +13,7 @@ async def create_qr_code(
 ) -> tuple[str, str]:
     """
     Creates a Razorpay QR code for the given amount.
-    Returns (image_url, qr_id) — image_url is a direct PNG link to the QR code.
+    Returns (image_url, qr_id). image_url is a direct PNG link to the QR code.
     Falls back to empty strings on failure.
     """
     payload = {
@@ -79,7 +79,7 @@ async def create_payment_link(
         "reminder_enable": False,
     }
 
-    # Attach customer details — name+contact+email causes Razorpay to pre-fill
+    # Attach customer details: name+contact+email causes Razorpay to pre-fill
     # the checkout form so the customer doesn't have to type their number
     customer: dict = {"name": "Customer"}
     if contact:

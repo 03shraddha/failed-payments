@@ -16,12 +16,12 @@ logger = logging.getLogger(__name__)
 SYSTEM_PROMPT = f"""You are a warm, friendly customer support assistant for
 {BUSINESS_NAME}, an online store selling anti-tarnish jewellery for women.
 
-Your tone is caring, reassuring, and personal — like a helpful friend who
+Your tone is caring, reassuring, and personal. Like a helpful friend who
 happens to run a jewellery shop. Keep messages concise and action-oriented.
 Never be robotic or overly formal. Use simple language.
 
 The shop sells pieces that don't tarnish, so customers can wear them daily
-without worry — highlight the emotional connection (a gift, daily wear,
+without worry. Highlight the emotional connection (a gift, daily wear,
 something special) when appropriate."""
 
 
@@ -37,19 +37,22 @@ def _clean(text: str) -> str:
     return text.replace("—", ",").replace("–", ",").strip()
 
 
-def _fallback(amount: float, reason: str, link: str) -> RecoveryMessages:
+def _fallback(amount: float, reason: str, link: str, product: str = "") -> RecoveryMessages:
     """Used when OpenAI is unavailable."""
+    item = f"your {product}" if product else "your order"
+    item_cap = f"Your {product}" if product else "Your order"
+
     return RecoveryMessages(
         sms=(
-            f"Hi! Your payment of Rs.{amount:.0f} at {BUSINESS_NAME} didn't go through. "
-            f"No worries, retry here: {link}"
+            f"Hi! {item_cap} from {BUSINESS_NAME} is still waiting for you. "
+            f"Your payment of Rs.{amount:.0f} didn't go through. Retry here: {link}"
         ),
-        email_subject=f"your order payment didn't go through, here's your retry link",
+        email_subject=f"{item} is still waiting for you",
         email_body=(
             f"Hi there,\n\n"
-            f"Your payment of Rs.{amount:.2f} couldn't be processed. "
-            f"Reason: {reason}\n\n"
-            f"We've created a fresh payment link just for you:\n{link}\n\n"
+            f"{item_cap} is still reserved for you! Your payment of Rs.{amount:.2f} "
+            f"didn't go through. Reason: {reason}\n\n"
+            f"We've kept {item} on hold and created a fresh payment link just for you:\n{link}\n\n"
             f"This link is valid for 24 hours. If you need any help, just reply to this email!\n\n"
             f"With love,\n{BUSINESS_NAME}"
         ),
@@ -61,6 +64,7 @@ async def generate_recovery_messages(
     reason: str,
     link: str,
     method: str = "unknown",
+    product: str = "",
 ) -> RecoveryMessages:
     """
     Calls OpenAI to generate personalised SMS + email content.
@@ -68,12 +72,14 @@ async def generate_recovery_messages(
     """
     if not OPENAI_API_KEY:
         logger.warning("OPENAI_API_KEY not set: using fallback messages")
-        return _fallback(amount, reason, link)
+        return _fallback(amount, reason, link, product)
 
     try:
         from openai import AsyncOpenAI
 
         client = AsyncOpenAI(api_key=OPENAI_API_KEY)
+
+        product_line = f"- Product: {product}\n" if product else ""
 
         user_prompt = f"""A customer's payment just failed at our jewellery shop.
 
@@ -81,20 +87,22 @@ Details:
 - Amount: Rs.{amount:.2f}
 - Payment method: {method}
 - Failure reason: {reason}
-- Retry link: {link}
+{product_line}- Retry link: {link}
 
 Please write TWO recovery messages:
 
 1. SMS (max 160 characters, warm and direct, include the retry link):
    Start with "SMS:" on its own line.
+   {"Mention the product by name naturally." if product else ""}
 
 2. Email (subject line + 2-3 short paragraphs):
    Start with "EMAIL SUBJECT:" on its own line, then "EMAIL BODY:" on its own line.
-   - Address the customer warmly
-   - Mention the amount and failure reason briefly (don't make them feel bad)
-   - Encourage them to retry - the jewellery piece is waiting for them
+   - Address the customer warmly, mention the product by name if provided
+   - Keep it light: mention the payment hiccup briefly, don't make them feel bad
+   - Say their {"piece" if not product else product} is still waiting, encourage them to retry
    - Sign off warmly from {BUSINESS_NAME}
-   - Include the retry link naturally in the body"""
+   - Include the retry link naturally in the body
+   - No em dashes, simple friendly English"""
 
         response = await client.chat.completions.create(
             model="gpt-4o-mini",

@@ -48,7 +48,7 @@ def _build_message(amount: float, reason: str, link: str) -> str:
     Builds the SMS body. Truncates reason if the full message exceeds 160 chars
     (> 160 chars splits into 2 segments, which costs double and looks broken).
     """
-    template = "Hi! Your payment of ₹{amount:.2f} failed ({reason}). Retry: {link} (24hrs) — {biz}"
+    template = "Hi! Your payment of ₹{amount:.2f} failed ({reason}). Retry: {link} (24hrs) | {biz}"
     msg = template.format(amount=amount, reason=reason, link=link, biz=BUSINESS_NAME)
 
     if len(msg) <= 160:

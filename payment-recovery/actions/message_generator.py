@@ -39,21 +39,32 @@ def _clean(text: str) -> str:
 
 def _fallback(amount: float, reason: str, link: str, product: str = "") -> RecoveryMessages:
     """Used when OpenAI is unavailable."""
-    item = f"your {product}" if product else "your order"
-    item_cap = f"Your {product}" if product else "Your order"
+    # Build item references: if we have a product name, call it out specifically
+    if product:
+        item_desc = product
+        item_ref = f"your {product}"
+        item_ref_cap = f"Your {product}"
+    else:
+        # Default jewelry example: necklace, bracelet, earrings set
+        item_desc = "necklace, bracelet, and earrings set"
+        item_ref = f"your {item_desc}"
+        item_ref_cap = f"Your {item_desc}"
 
     return RecoveryMessages(
         sms=(
-            f"Hi! {item_cap} from {BUSINESS_NAME} is still waiting for you. "
-            f"Your payment of Rs.{amount:.0f} didn't go through. Retry here: {link}"
+            f"Psst! {item_ref_cap} from {BUSINESS_NAME} is almost gone, only 2 pieces left! "
+            f"Your Rs.{amount:.0f} payment didn't go through. Grab it before someone else does: {link}"
         ),
-        email_subject=f"{item} is still waiting for you",
+        email_subject=f"Someone else is eyeing {item_ref}... act fast!",
         email_body=(
             f"Hi there,\n\n"
-            f"{item_cap} is still reserved for you! Your payment of Rs.{amount:.2f} "
-            f"didn't go through. Reason: {reason}\n\n"
-            f"We've kept {item} on hold and created a fresh payment link just for you:\n{link}\n\n"
-            f"This link is valid for 24 hours. If you need any help, just reply to this email!\n\n"
+            f"We saved {item_ref} just for you, but we can't hold it forever!\n\n"
+            f"We only have 2 pieces of this set left in stock, and your payment of "
+            f"Rs.{amount:.2f} didn't quite make it through (reason: {reason}).\n\n"
+            f"The good news? Your order is still reserved and one click gets it home:\n{link}\n\n"
+            f"This link is valid for 24 hours, after that your spot opens up to the next person "
+            f"on the waitlist. Don't let someone else steal your set!\n\n"
+            f"If you hit any trouble, just reply to this email and we'll sort it out.\n\n"
             f"With love,\n{BUSINESS_NAME}"
         ),
     )
